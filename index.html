@@ -140,7 +140,10 @@
     h1{ margin:0 0 4px; font-size:22px; color:#b3005e; }
     p{ margin:0; color:var(--muted); line-height:1.6; }
 
-    .row{ display:flex; gap:10px; flex-wrap:wrap; margin:12px 0 14px; align-items:center; }
+    .row{
+      display:flex; gap:10px; flex-wrap:wrap;
+      margin:12px 0 14px; align-items:center;
+    }
 
     .btn{
       padding:10px 16px;
@@ -195,10 +198,7 @@
       0%,100%{ transform:scale(1); }
       50%{ transform:scale(1.35); }
     }
-    .vol{
-      width:110px;
-      accent-color: #ff4d8d;
-    }
+    .vol{ width:110px; accent-color:#ff4d8d; }
 
     .grid{
       display:grid;
@@ -321,7 +321,7 @@
 
     .envelopeIcon{
       width:min(86%, 380px);
-      aspect-ratio: 16/10;
+      aspect-ratio:16/10;
       border-radius:22px;
       position:relative;
       background:linear-gradient(135deg,#fff0f6,#ffe6f2);
@@ -406,12 +406,42 @@
       padding:10px 4px 0;
     }
 
+    /* Loading overlay */
+    .loading{
+      position:absolute;
+      inset:0;
+      display:grid;
+      place-items:center;
+      background:rgba(255,255,255,0.6);
+      backdrop-filter: blur(8px);
+      z-index:60;
+    }
+    .loadingBox{
+      background:rgba(255,255,255,0.9);
+      border:1px solid rgba(255,105,180,0.25);
+      box-shadow:0 20px 50px rgba(255,105,180,0.25);
+      border-radius:22px;
+      padding:16px 18px;
+      font-weight:900;
+      color:#b3005e;
+      display:flex;
+      align-items:center;
+      gap:10px;
+    }
+    .spinner{
+      width:18px;height:18px;border-radius:99px;
+      border:3px solid rgba(255,77,141,0.25);
+      border-top-color: rgba(255,77,141,0.95);
+      animation:spin 0.9s linear infinite;
+    }
+    @keyframes spin{ to{ transform:rotate(360deg);} }
+
     @media (max-width:520px){
       .modalCard{ min-height:72vh; }
       .msg{ font-size:17px; }
       .envelopeBtn{ width:92%; padding:18px 16px; }
       .envelopeText{ font-size:17px; }
-      .music{ width:100%; justify-content:space-between; }
+      .music{ width:100%; justify-content:space-between; margin-left:0; }
       .vol{ width:120px; }
     }
   </style>
@@ -421,8 +451,8 @@
   <div class="float-hearts" aria-hidden="true" id="floatHearts"></div>
   <canvas id="confetti"></canvas>
 
-  <!-- ✅ Audio (Put love.mp3 in same folder) -->
-  <audio id="bgMusic" preload="auto" loop>
+  <!-- ✅ Audio (big files won't block page) -->
+  <audio id="bgMusic" preload="none" loop>
     <source src="love.mp3" type="audio/mpeg">
   </audio>
 
@@ -442,7 +472,6 @@
       <button class="btn" id="restartBtn">Restart</button>
       <button class="btn" id="guideBtn">Toggle Guide</button>
 
-      <!-- ✅ Music control -->
       <div class="music">
         <div class="pill"><span class="dot" id="musicDot"></span> Music</div>
         <button class="btn" id="musicBtn" style="padding:10px 14px;border-radius:18px;">Play ❤</button>
@@ -458,6 +487,10 @@
         </div>
 
         <div id="board">
+          <div class="loading" id="loading">
+            <div class="loadingBox"><span class="spinner"></span> Loading… ❤</div>
+          </div>
+
           <div class="envelopeWrap" id="envelopeWrap">
             <button class="envelopeBtn" id="openLetterBtn" type="button">
               <div class="envelopeIcon"></div>
@@ -488,7 +521,10 @@
   </div>
 
 <script>
+  // ✅ MUST match your file names (same folder as index.html)
   const IMAGE_SRC = "puzzle.jpg";
+  const MUSIC_SRC = "love.mp3";
+
   const ROWS = 4;
   const COLS = 4;
 
@@ -511,20 +547,79 @@ Happy Valentine's Day my lovely Emy ♥️ ♥️`;
   const closeModal = document.getElementById("closeModal");
   modalMsg.textContent = finalMessage;
 
+  const loading = document.getElementById("loading");
+
   closeModal.addEventListener("click", () => modal.classList.remove("open"));
   modal.addEventListener("click", (e) => { if (e.target === modal) modal.classList.remove("open"); });
-
-  const IMG = `url('${IMAGE_SRC}')`;
-
-  let pieces = [];
-  let showGuide = true;
-  let confettiOnce = false;
 
   // prevent scroll/refresh only while dragging
   let isDragging = false;
   document.addEventListener("touchmove", (e) => {
     if (isDragging) e.preventDefault();
   }, { passive: false });
+
+  // ---------- MUSIC ----------
+  const bgMusic = document.getElementById("bgMusic");
+  const musicBtn = document.getElementById("musicBtn");
+  const vol = document.getElementById("vol");
+  const musicDot = document.getElementById("musicDot");
+
+  bgMusic.volume = parseFloat(vol.value);
+
+  function setMusicUI(playing){
+    musicBtn.textContent = playing ? "Pause ❤" : "Play ❤";
+    musicDot.classList.toggle("on", playing);
+  }
+
+  async function playMusic(){
+    try{
+      await bgMusic.play();
+      setMusicUI(true);
+    }catch(err){
+      setMusicUI(false);
+    }
+  }
+  function pauseMusic(){
+    bgMusic.pause();
+    setMusicUI(false);
+  }
+
+  musicBtn.addEventListener("click", async () => {
+    if (bgMusic.paused) await playMusic();
+    else pauseMusic();
+  });
+
+  vol.addEventListener("input", () => {
+    bgMusic.volume = parseFloat(vol.value);
+  });
+
+  bgMusic.addEventListener("error", () => {
+    console.log("Music error:", MUSIC_SRC);
+    setMusicUI(false);
+    musicBtn.textContent = "No music ❤";
+  });
+
+  // auto-start after FIRST user interaction
+  let armed = false;
+  function armAutoplay(){
+    if (armed) return;
+    armed = true;
+    playMusic();
+    window.removeEventListener("pointerdown", armAutoplay, {capture:true});
+    window.removeEventListener("touchstart", armAutoplay, {capture:true});
+    window.removeEventListener("keydown", armAutoplay, {capture:true});
+  }
+  window.addEventListener("pointerdown", armAutoplay, {capture:true, passive:true});
+  window.addEventListener("touchstart", armAutoplay, {capture:true, passive:true});
+  window.addEventListener("keydown", armAutoplay, {capture:true});
+  // --------------------------
+
+  // ---------- GAME ----------
+  const IMG = (src) => `url('${src}')`;
+  let imgUrl = IMAGE_SRC;
+  let pieces = [];
+  let showGuide = true;
+  let confettiOnce = false;
 
   function shuffle(arr){
     const a = [...arr];
@@ -578,6 +673,7 @@ Happy Valentine's Day my lovely Emy ♥️ ♥️`;
   }
 
   function createPieces(){
+    const IMG_URL = IMG(imgUrl);
     for (let r=0; r<ROWS; r++){
       for (let c=0; c<COLS; c++){
         const correctIdx = r*COLS + c;
@@ -586,7 +682,8 @@ Happy Valentine's Day my lovely Emy ♥️ ♥️`;
         d.dataset.correct = String(correctIdx);
         d.dataset.placed = "0";
         d.dataset.locked = "0";
-        d.style.setProperty("--img", IMG);
+
+        d.style.setProperty("--img", IMG_URL);
         d.style.setProperty("--bgSize", `${COLS*100}% ${ROWS*100}%`);
 
         const posX = (c/(COLS-1||1))*100;
@@ -836,7 +933,7 @@ Happy Valentine's Day my lovely Emy ♥️ ♥️`;
     });
   }
 
-  // Confetti
+  // Confetti (kept simple)
   const confettiCanvas = document.getElementById("confetti");
   const ctx = confettiCanvas.getContext("2d");
   let confetti = [];
@@ -872,10 +969,7 @@ Happy Valentine's Day my lovely Emy ♥️ ♥️`;
     ctx.clearRect(0,0,confettiCanvas.width, confettiCanvas.height);
 
     for (const p of confetti){
-      p.x += p.vx;
-      p.y += p.vy;
-      p.a += p.va;
-      p.life -= 1;
+      p.x += p.vx; p.y += p.vy; p.a += p.va; p.life -= 1;
 
       ctx.save();
       ctx.translate(p.x, p.y);
@@ -884,7 +978,6 @@ Happy Valentine's Day my lovely Emy ♥️ ♥️`;
       const hue = 320 + Math.floor(Math.random()*45);
       ctx.fillStyle = `hsla(${hue}, 90%, 70%, 0.9)`;
       ctx.fillRect(-p.s, -p.s, p.s*2, p.s*2);
-
       ctx.restore();
     }
 
@@ -897,14 +990,29 @@ Happy Valentine's Day my lovely Emy ♥️ ♥️`;
     }
   }
 
-  // Floating hearts generator
+  openLetterBtn.addEventListener("click", () => {
+    modal.classList.add("open");
+    if (!confettiOnce){
+      confettiOnce = true;
+      startConfetti();
+    }
+    if (bgMusic.paused) playMusic();
+  });
+
+  document.getElementById("shuffleBtn").addEventListener("click", shuffleTray);
+  document.getElementById("restartBtn").addEventListener("click", initGame);
+  document.getElementById("guideBtn").addEventListener("click", () => {
+    showGuide = !showGuide;
+    [...board.querySelectorAll(".ghostSlot")].forEach(s => s.style.opacity = showGuide ? "1" : "0");
+  });
+
+  // hearts background
   const floatHearts = document.getElementById("floatHearts");
   const COUNT = 34;
   for(let i=0;i<COUNT;i++){
     const h = document.createElement("div");
     h.className = "heart";
     h.textContent = "❤";
-
     const left = Math.random()*100;
     const dur = 7.5 + Math.random()*10.5;
     const delay = Math.random()*6;
@@ -932,86 +1040,32 @@ Happy Valentine's Day my lovely Emy ♥️ ♥️`;
     floatHearts.appendChild(h);
   }
 
-  document.getElementById("shuffleBtn").addEventListener("click", shuffleTray);
-  document.getElementById("restartBtn").addEventListener("click", init);
-  document.getElementById("guideBtn").addEventListener("click", () => {
-    showGuide = !showGuide;
-    [...board.querySelectorAll(".ghostSlot")].forEach(s => s.style.opacity = showGuide ? "1" : "0");
-  });
-
-  // ---------- MUSIC LOGIC ----------
-  const bgMusic = document.getElementById("bgMusic");
-  const musicBtn = document.getElementById("musicBtn");
-  const vol = document.getElementById("vol");
-  const musicDot = document.getElementById("musicDot");
-
-  bgMusic.volume = parseFloat(vol.value);
-
-  function setMusicUI(playing){
-    musicBtn.textContent = playing ? "Pause ❤" : "Play ❤";
-    musicDot.classList.toggle("on", playing);
-  }
-
-  async function playMusic(){
-    try{
-      await bgMusic.play();
-      setMusicUI(true);
-    }catch(err){
-      // browser blocked until user gesture
-      setMusicUI(false);
-    }
-  }
-
-  function pauseMusic(){
-    bgMusic.pause();
-    setMusicUI(false);
-  }
-
-  musicBtn.addEventListener("click", async () => {
-    if (bgMusic.paused) await playMusic();
-    else pauseMusic();
-  });
-
-  vol.addEventListener("input", () => {
-    bgMusic.volume = parseFloat(vol.value);
-  });
-
-  // auto-start after FIRST user interaction anywhere
-  let armed = false;
-  function armAutoplay(){
-    if (armed) return;
-    armed = true;
-    playMusic();
-    window.removeEventListener("pointerdown", armAutoplay, {capture:true});
-    window.removeEventListener("touchstart", armAutoplay, {capture:true});
-    window.removeEventListener("keydown", armAutoplay, {capture:true});
-  }
-  window.addEventListener("pointerdown", armAutoplay, {capture:true, passive:true});
-  window.addEventListener("touchstart", armAutoplay, {capture:true, passive:true});
-  window.addEventListener("keydown", armAutoplay, {capture:true});
-  // --------------------------------
-
-  const openLetterBtn = document.getElementById("openLetterBtn");
-  openLetterBtn.addEventListener("click", () => {
-    modal.classList.add("open");
-    startConfetti();
-    // ensure music starts when opening letter too
-    if (bgMusic.paused) playMusic();
-  });
-
-  function init(){
+  function initGame(){
+    loading.style.display = "grid";
     clearAll();
     makeSlots();
     updateTrayPieceSize();
+
+    // always init pieces (even if image fails)
     createPieces();
+    checkSolved();
+
+    // hide loading shortly after layout
+    setTimeout(()=>{ loading.style.display = "none"; }, 250);
   }
 
+  // preload image with cache-bust
   const preload = new Image();
-  preload.onload = () => init();
-  preload.onerror = () => {
-    hint.textContent = "Image not loading. Ensure it's named puzzle.jpg and in the same folder as index.html.";
+  preload.onload = () => {
+    imgUrl = IMAGE_SRC + "?v=" + Date.now();
+    initGame();
   };
-  preload.src = IMAGE_SRC;
+  preload.onerror = () => {
+    imgUrl = ""; // fallback (pieces will be blank)
+    initGame();
+    hint.textContent = "Image not loading ❤ (check puzzle.jpg name/path)";
+  };
+  preload.src = IMAGE_SRC + "?v=" + Date.now();
 </script>
 </body>
 </html>
