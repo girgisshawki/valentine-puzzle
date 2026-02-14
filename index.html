@@ -5,6 +5,11 @@
   <meta name="viewport" content="width=device-width,initial-scale=1"/>
   <title>Valentine Puzzle</title>
 
+  <!-- Nice fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;700&family=Nunito:wght@600;800;900&display=swap" rel="stylesheet">
+
   <style>
     :root{
       --pink1:#ff4d8d;
@@ -25,7 +30,7 @@
 
     body{
       margin:0;
-      font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial;
+      font-family: Nunito, system-ui, -apple-system, Segoe UI, Roboto, Arial;
       min-height:100vh;
       display:flex;
       align-items:flex-start;
@@ -59,7 +64,6 @@
       transform:rotate(-8deg);
     }
 
-    /* floating hearts background */
     .float-hearts{
       position:fixed;
       inset:0;
@@ -147,13 +151,14 @@
     .btn{
       padding:10px 16px;
       border-radius:20px;
-      font-weight:800;
+      font-weight:900;
       cursor:pointer;
       border:none;
       background:linear-gradient(135deg,var(--pink1),var(--pink2));
       color:white;
       box-shadow:0 10px 24px rgba(255,105,180,0.40);
       transition:transform .12s ease, box-shadow .2s ease, filter .2s ease;
+      font-family: Nunito, system-ui, -apple-system, Segoe UI, Roboto, Arial;
     }
     .btn:hover{
       transform:translateY(-2px);
@@ -161,7 +166,6 @@
       filter:saturate(1.05);
     }
 
-    /* Music UI */
     .music{
       margin-left:auto;
       display:flex;
@@ -184,7 +188,7 @@
       user-select:none;
     }
     .dot{
-      width:8px;height:8px;border-radius:99px;
+      width:8px;height:8px;border-radius:999px;
       background:rgba(179,0,94,0.35);
       box-shadow:0 0 0 6px rgba(255,105,180,0.10);
     }
@@ -222,6 +226,7 @@
       display:flex;
       justify-content:space-between;
       gap:10px;
+      font-weight:900;
     }
     .progress{ font-size:12px; color:rgba(90,0,64,0.65); }
 
@@ -283,10 +288,9 @@
       margin-top:8px;
       font-size:13px;
       color:rgba(90,0,64,0.78);
-      font-weight:800;
+      font-weight:900;
     }
 
-    /* ✅ SOLVED MODAL (never disappears by mistake) */
     .solvedModal{
       position:fixed;
       inset:0;
@@ -301,8 +305,8 @@
     .solvedModal.open{ display:flex; }
 
     .solvedCard{
-      width:min(860px, 94vw);
-      min-height:min(72vh, 680px);
+      width:min(900px, 94vw);
+      min-height:min(78vh, 760px);
       background:linear-gradient(135deg,#fff0f6,#ffe6f2);
       border-radius:30px;
       border:1px solid rgba(255,105,180,0.32);
@@ -320,7 +324,6 @@
       to{ transform: translateY(0) scale(1); opacity:1; }
     }
 
-    /* Envelope animation */
     .env{
       width:min(560px, 92%);
       aspect-ratio: 16/10;
@@ -341,7 +344,6 @@
       0%,100%{ transform:translateY(0) scale(1); }
       50%{ transform:translateY(-7px) scale(1.012); }
     }
-
     .env .shine{
       position:absolute;
       inset:-40%;
@@ -350,7 +352,6 @@
       opacity:0.75;
       pointer-events:none;
     }
-
     .env .flap{
       position:absolute;
       left:50%;
@@ -368,7 +369,6 @@
       transition: transform .45s ease;
       backface-visibility:hidden;
     }
-
     .env .body{
       position:absolute;
       inset:18% 10% 14% 10%;
@@ -390,7 +390,6 @@
       color:white;
       font-size:22px;
     }
-
     .env .tap{
       position:absolute;
       bottom:16px;
@@ -412,7 +411,6 @@
       margin-top:-2px;
     }
 
-    /* hearts around envelope */
     .sparkHearts{
       position:absolute;
       inset:0;
@@ -441,10 +439,9 @@
       100%{ opacity:0; transform:translate(-50%,-90%) scale(1.45); }
     }
 
-    /* Letter */
     .letter{
-      width:min(860px, 94vw);
-      min-height:min(78vh, 760px);
+      width:min(920px, 94vw);
+      min-height:min(82vh, 820px);
       background:linear-gradient(135deg,#fff0f6,#ffe6f2);
       border-radius:32px;
       border:1px solid rgba(255,105,180,0.32);
@@ -475,6 +472,8 @@
       display:flex;
       align-items:center;
       gap:8px;
+      font-weight:900;
+      font-family: Nunito, system-ui, -apple-system, Segoe UI, Roboto, Arial;
     }
 
     .close{
@@ -486,22 +485,82 @@
       cursor:pointer;
       font-weight:1000;
       box-shadow:0 10px 22px rgba(255,105,180,0.35);
+      font-family: Nunito, system-ui, -apple-system, Segoe UI, Roboto, Arial;
+    }
+
+    /* Message area + typewriter */
+    .msgWrap{
+      flex:1;
+      overflow:auto;
+      border-radius:22px;
+      background:rgba(255,255,255,0.35);
+      border:1px solid rgba(255,105,180,0.18);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.6);
+      padding:16px 14px;
     }
 
     .msg{
       white-space:pre-wrap;
       color:rgba(90,0,64,0.92);
-      line-height:1.85;
-      font-weight:800;
-      font-size:18px;
-      padding:10px 6px 0;
+      line-height:1.95;
+      font-weight:600;
+      font-family: "Playfair Display", Georgia, "Times New Roman", serif;
+
+      font-size: clamp(16px, 2.3vw, 22px);
+      max-width: 62ch;
+      margin: 0 auto;
+      position:relative;
+    }
+
+    /* blinking cursor */
+    .cursor{
+      display:inline-block;
+      width:10px;
+      margin-left:2px;
+      color:rgba(179,0,94,0.85);
+      animation: blink .9s steps(1) infinite;
+      font-weight:700;
+    }
+    @keyframes blink { 50%{ opacity:0; } }
+
+    /* soft sparkle overlay */
+    .sparkle{
+      position:absolute;
+      inset:-20px;
+      pointer-events:none;
+      background:
+        radial-gradient(circle at 18% 30%, rgba(255,255,255,0.55), transparent 45%),
+        radial-gradient(circle at 82% 65%, rgba(255,255,255,0.42), transparent 48%),
+        radial-gradient(circle at 55% 10%, rgba(255,255,255,0.28), transparent 55%);
+      mix-blend-mode: screen;
+      opacity:0.55;
+      filter: blur(0.2px);
+      animation: shimmer 2.2s ease-in-out infinite;
+    }
+    @keyframes shimmer{
+      0%,100%{ transform:translateY(0); opacity:0.45; }
+      50%{ transform:translateY(-8px); opacity:0.75; }
+    }
+
+    /* signature */
+    .sig{
+      max-width:62ch;
+      margin: 12px auto 0;
+      font-family: "Playfair Display", Georgia, "Times New Roman", serif;
+      font-weight:700;
+      font-size: clamp(15px, 2vw, 18px);
+      color:rgba(179,0,94,0.92);
+      display:flex;
+      justify-content:flex-end;
+      gap:6px;
+      opacity:0.95;
     }
 
     @media (max-width:520px){
       .music{ width:100%; justify-content:space-between; margin-left:0; }
       .vol{ width:120px; }
-      .letter{ min-height:80vh; }
-      .msg{ font-size:17px; }
+      .letter{ min-height:84vh; }
+      .msg{ max-width: 60ch; }
     }
   </style>
 </head>
@@ -557,7 +616,7 @@
 
   <!-- SOLVED MODAL -->
   <div class="solvedModal" id="solvedModal">
-    <div class="solvedCard" id="solvedCard">
+    <div class="solvedCard">
       <div class="env" id="env">
         <div class="shine"></div>
         <div class="sparkHearts" aria-hidden="true">
@@ -577,7 +636,12 @@
           <h2>❤ A letter for you</h2>
           <button class="close" id="closeLetter">Close</button>
         </div>
-        <div class="msg" id="letterMsg"></div>
+
+        <div class="msgWrap">
+          <div class="sparkle"></div>
+          <div class="msg" id="letterMsg"></div>
+          <div class="sig" id="signature" style="display:none;">— Girgis <span>♥️</span></div>
+        </div>
       </div>
     </div>
   </div>
@@ -586,28 +650,39 @@
   const IMAGE_SRC = "puzzle.jpg";
   const ROWS = 4, COLS = 4;
 
+  // ✅ Your message
   const finalMessage =
-`Some sunsets are beautiful...
-But you're my favourite sunset ♥️ ✨
+`Some sunsets are beautiful, They arrive gently, spill gold across the sky, and disappear without asking anything of us.
+But you…
+you are not just a sunset..
 
-Happy Valentine's Day my lovely Emy ♥️ ♥️`;
+You are the quiet after the noise.
+The warmth that stays on my skin long after the light is gone.
+The kind of beauty that doesn’t fade when the sky turns dark.
+
+The horizon blushes for a moment but You make the whole world glow.
+And If the day is a story, you are the last perfect line.
+
+If the sky is a canvas, you are the color it saves for magic.
+
+Happy Valentine’s Day, my lovely Emy ♥️ 🫂 
+
+Some sunsets are beautiful but you're my perfect light of all sunsets ♥️♥️`;
 
   const board = document.getElementById("board");
   const tray = document.getElementById("tray");
   const hint = document.getElementById("hint");
   const progress = document.getElementById("progress");
 
-  // solved modal elements
   const solvedModal = document.getElementById("solvedModal");
-  const solvedCard = document.getElementById("solvedCard");
   const env = document.getElementById("env");
   const flap = document.getElementById("flap");
   const letter = document.getElementById("letter");
   const closeLetter = document.getElementById("closeLetter");
   const letterMsg = document.getElementById("letterMsg");
-  letterMsg.textContent = finalMessage;
+  const signature = document.getElementById("signature");
 
-  // ✅ IMPORTANT: clicking outside DOES NOTHING (keeps letter/ envelope always available)
+  // keep modal safe (tap outside does nothing)
   solvedModal.addEventListener("click", (e) => {
     if (e.target === solvedModal) e.preventDefault();
   });
@@ -712,7 +787,7 @@ Happy Valentine's Day my lovely Emy ♥️ ♥️`;
 
   // floating hearts
   const floatHearts = document.getElementById("floatHearts");
-  const COUNT = 44; // more hearts
+  const COUNT = 44;
   for(let i=0;i<COUNT;i++){
     const h = document.createElement("div");
     h.className = "heart";
@@ -744,9 +819,41 @@ Happy Valentine's Day my lovely Emy ♥️ ♥️`;
     floatHearts.appendChild(h);
   }
 
+  // ✅ Typewriter
+  let typerTimer = null;
+  function typeMessage(text){
+    if (typerTimer) clearInterval(typerTimer);
+    letterMsg.innerHTML = "";
+    signature.style.display = "none";
+
+    const speed = 16; // ms per char (smooth)
+    let i = 0;
+
+    const cursor = document.createElement("span");
+    cursor.className = "cursor";
+    cursor.textContent = "▍";
+    letterMsg.appendChild(cursor);
+
+    typerTimer = setInterval(() => {
+      // insert char before cursor
+      if (i < text.length){
+        cursor.insertAdjacentText("beforebegin", text[i]);
+        i++;
+
+        // auto-scroll inside msgWrap while typing
+        const wrap = letterMsg.closest(".msgWrap");
+        wrap.scrollTop = wrap.scrollHeight;
+      } else {
+        clearInterval(typerTimer);
+        typerTimer = null;
+        cursor.remove();
+        signature.style.display = "flex";
+      }
+    }, speed);
+  }
+
   // puzzle
   let imgUrl = IMAGE_SRC;
-  const IMG = (src)=> `url('${src}')`;
   let pieces = [];
   let showGuide = true;
   let confettiOnce = false;
@@ -767,10 +874,8 @@ Happy Valentine's Day my lovely Emy ♥️ ♥️`;
     pieces = [];
     confettiOnce = false;
 
-    // keep solved modal closed until solved
     solvedModal.classList.remove("open");
 
-    // reset envelope / letter
     letter.style.display = "none";
     env.style.display = "flex";
     flap.style.transform = "translateX(-50%) rotateX(0deg)";
@@ -809,7 +914,7 @@ Happy Valentine's Day my lovely Emy ♥️ ♥️`;
   }
 
   function createPieces(){
-    const IMG_URL = IMG(imgUrl);
+    const IMG_URL = `url('${imgUrl}')`;
 
     for (let r=0; r<ROWS; r++){
       for (let c=0; c<COLS; c++){
@@ -860,7 +965,6 @@ Happy Valentine's Day my lovely Emy ♥️ ♥️`;
     if (ok){
       hint.textContent = "Perfect ❤";
       solvedModal.classList.add("open");
-
       if (!confettiOnce){
         confettiOnce = true;
         startConfetti();
@@ -1072,12 +1176,15 @@ Happy Valentine's Day my lovely Emy ♥️ ♥️`;
     });
   }
 
-  // ✅ Open envelope -> show letter (keeps modal open)
+  // open envelope -> letter + typewriter
   env.addEventListener("click", () => {
     flap.style.transform = "translateX(-50%) rotateX(180deg)";
     setTimeout(() => {
       env.style.display = "none";
       letter.style.display = "flex";
+
+      typeMessage(finalMessage);
+
       if (bgMusic.paused) playMusic();
       if (!confettiOnce){
         confettiOnce = true;
@@ -1086,14 +1193,17 @@ Happy Valentine's Day my lovely Emy ♥️ ♥️`;
     }, 260);
   });
 
-  // ✅ Close letter = go back to envelope (modal stays open!)
+  // close letter -> back to envelope
   closeLetter.addEventListener("click", () => {
+    if (typerTimer) { clearInterval(typerTimer); typerTimer = null; }
+    letterMsg.textContent = "";
+    signature.style.display = "none";
+
     letter.style.display = "none";
     env.style.display = "flex";
     flap.style.transform = "translateX(-50%) rotateX(0deg)";
   });
 
-  // buttons
   document.getElementById("shuffleBtn").addEventListener("click", shuffleTray);
   document.getElementById("restartBtn").addEventListener("click", initGame);
   document.getElementById("guideBtn").addEventListener("click", () => {
