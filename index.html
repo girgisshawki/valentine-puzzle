@@ -19,9 +19,9 @@
       --trayH: 110px;
     }
 
-    /* ✅ سكرول عادي + تقليل pull-to-refresh قدر الإمكان */
+    /* ✅ سكرول عادي للصفحة */
     html, body{
-      overscroll-behavior-y: none; /* يقلل pull-to-refresh في أجهزة كتير */
+      overscroll-behavior-y: none;
     }
 
     body{
@@ -30,18 +30,22 @@
       color:var(--text);
       min-height:100vh;
       display:flex;
-      align-items:flex-start;   /* عشان يبقى في سكرول طبيعي */
+      align-items:flex-start;
       justify-content:center;
-      padding: 18px 0;          /* مساحة لطيفة فوق/تحت */
+      padding: 18px 0;
       background:
         radial-gradient(900px 600px at 20% 10%, rgba(255,77,125,0.25), transparent 60%),
         radial-gradient(900px 700px at 80% 90%, rgba(255,179,199,0.18), transparent 60%),
         linear-gradient(180deg,#0b0f19,#1a1030);
-      touch-action: pan-y; /* ✅ يسمح بالسكرول العمودي الطبيعي */
+      touch-action: pan-y; /* يسمح بالسكرول العمودي */
     }
 
-    /* ✅ أثناء اللعب على البورد والتراي: امنع المتصفح يفسر السحب كسكرول */
-    #board, #tray, .piece{
+    /* ✅ اسمح بالسكرول حتى لو لمست البورد/التراي */
+    #board, #tray{
+      touch-action: pan-y;
+    }
+    /* ✅ امنع المتصفح يفسر سحب القطعة كسكرول */
+    .piece{
       touch-action: none;
     }
 
@@ -286,7 +290,7 @@
       <div class="panel">
         <div class="title"><span>Pieces tray</span></div>
         <div id="tray"></div>
-        <div class="tiny">✅ سكرول الصفحة شغال عادي. اللعبة مش بتعمل Restart على حركة شريط المتصفح.</div>
+        <div class="tiny">✅ سكرول الصفحة شغال. السحب يمنع السكرول بس وقت تحريك القطعة.</div>
       </div>
     </div>
   </div>
@@ -333,7 +337,7 @@ but this one is yours.
   let showGuide = true;
   let solvedOnce = false;
 
-  // ✅ امنع pull-to-refresh/scroll "بس أثناء السحب" — مش طول الوقت
+  // ✅ امنع السكرول/refresh فقط أثناء السحب
   let isDragging = false;
   document.addEventListener("touchmove", (e) => {
     if (isDragging) e.preventDefault();
@@ -465,10 +469,11 @@ but this one is yours.
       p.dataset.dragBound = "1";
 
       p.addEventListener("pointerdown", (e) => {
+        // مهم: منع السلوك الافتراضي للقطعة نفسها فقط
         e.preventDefault();
         p.setPointerCapture(e.pointerId);
 
-        // ✅ أثناء السحب فقط امنع السكرول
+        // ✅ اقفل السكرول وقت السحب فقط
         isDragging = true;
 
         const isPlaced = (p.dataset.placed === "1");
@@ -685,9 +690,7 @@ but this one is yours.
     createPieces();
   }
 
-  // ✅ مهم: مفيش init على resize (عشان الموبايل مايعيدش اللعبة مع حركة الشريط)
-  // (لكن ما زلنا نعمل resize للكونفيتي فقط)
-
+  // ✅ مهم: مفيش init على resize عشان الموبايل مايعيدش اللعبة
   const preload = new Image();
   preload.onload = () => init();
   preload.onerror = () => {
