@@ -19,29 +19,31 @@
       --trayH: 110px;
     }
 
-    /* ====== LOCK SCROLL / PULL-TO-REFRESH (strong) ====== */
+    /* ✅ سكرول عادي + تقليل pull-to-refresh قدر الإمكان */
     html, body{
-      height: 100%;
-      overflow: hidden;              /* no page scrolling */
-      overscroll-behavior: none;      /* no pull-to-refresh */
+      overscroll-behavior-y: none; /* يقلل pull-to-refresh في أجهزة كتير */
     }
+
     body{
-      position: fixed;               /* keep viewport fixed */
-      width: 100%;
       margin:0;
       font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial;
       color:var(--text);
+      min-height:100vh;
       display:flex;
-      align-items:center;
+      align-items:flex-start;   /* عشان يبقى في سكرول طبيعي */
       justify-content:center;
+      padding: 18px 0;          /* مساحة لطيفة فوق/تحت */
       background:
         radial-gradient(900px 600px at 20% 10%, rgba(255,77,125,0.25), transparent 60%),
         radial-gradient(900px 700px at 80% 90%, rgba(255,179,199,0.18), transparent 60%),
         linear-gradient(180deg,#0b0f19,#1a1030);
+      touch-action: pan-y; /* ✅ يسمح بالسكرول العمودي الطبيعي */
     }
 
-    /* While playing, don't let browser interpret gestures as scrolling */
-    #board, #tray, .piece{ touch-action: none; }
+    /* ✅ أثناء اللعب على البورد والتراي: امنع المتصفح يفسر السحب كسكرول */
+    #board, #tray, .piece{
+      touch-action: none;
+    }
 
     #confetti{
       position:fixed;
@@ -52,8 +54,6 @@
 
     .card{
       width:min(1040px,95vw);
-      max-height: 94vh;              /* keep inside viewport */
-      overflow: hidden;              /* avoid internal scroll bounce */
       background:var(--card);
       border:1px solid var(--border);
       border-radius:22px;
@@ -146,7 +146,6 @@
       color:rgba(233,238,252,0.70);
     }
 
-    /* Board */
     #board{
       position:relative;
       width:100%;
@@ -157,7 +156,6 @@
       border:1px solid rgba(255,255,255,0.15);
     }
 
-    /* Tray */
     #tray{
       display:flex;
       flex-wrap:wrap;
@@ -166,7 +164,6 @@
       align-content:flex-start;
     }
 
-    /* Pieces */
     .piece{
       width: var(--trayW);
       height: var(--trayH);
@@ -207,7 +204,6 @@
       line-height:1.5;
     }
 
-    /* Modal */
     .modal{
       position:fixed;
       inset:0;
@@ -290,7 +286,7 @@
       <div class="panel">
         <div class="title"><span>Pieces tray</span></div>
         <div id="tray"></div>
-        <div class="tiny">تم إيقاف الـ pull-to-refresh نهائيًا. (الصفحة بدون scroll)</div>
+        <div class="tiny">✅ سكرول الصفحة شغال عادي. اللعبة مش بتعمل Restart على حركة شريط المتصفح.</div>
       </div>
     </div>
   </div>
@@ -306,7 +302,6 @@
   </div>
 
 <script>
-  /* ====== Settings ====== */
   const IMAGE_SRC = "puzzle.jpg";
   const ROWS = 4;
   const COLS = 4;
@@ -318,7 +313,6 @@ Some sunsets are beautiful…
 but this one is yours.
 
 — Girgis`;
-  /* ====================== */
 
   const board = document.getElementById("board");
   const tray = document.getElementById("tray");
@@ -339,15 +333,11 @@ but this one is yours.
   let showGuide = true;
   let solvedOnce = false;
 
-  // ===== Ultra-strong prevent refresh on mobile =====
-  // Prevent any touchmove from scrolling/refreshing the page.
+  // ✅ امنع pull-to-refresh/scroll "بس أثناء السحب" — مش طول الوقت
+  let isDragging = false;
   document.addEventListener("touchmove", (e) => {
-    e.preventDefault();
+    if (isDragging) e.preventDefault();
   }, { passive: false });
-
-  // Prevent touchstart default on play areas (helps some browsers)
-  board.addEventListener("touchstart", (e) => e.preventDefault(), { passive: false });
-  tray.addEventListener("touchstart", (e) => e.preventDefault(), { passive: false });
 
   function shuffle(arr){
     const a = [...arr];
@@ -368,10 +358,8 @@ but this one is yours.
 
   function makeSlots(){
     const rect = board.getBoundingClientRect();
-    const W = rect.width;
-    const H = rect.height;
-    const slotW = W / COLS;
-    const slotH = H / ROWS;
+    const slotW = rect.width / COLS;
+    const slotH = rect.height / ROWS;
 
     for (let r=0; r<ROWS; r++){
       for (let c=0; c<COLS; c++){
@@ -480,6 +468,9 @@ but this one is yours.
         e.preventDefault();
         p.setPointerCapture(e.pointerId);
 
+        // ✅ أثناء السحب فقط امنع السكرول
+        isDragging = true;
+
         const isPlaced = (p.dataset.placed === "1");
         const fromSlot = isPlaced ? parseInt(p.dataset.slot, 10) : null;
 
@@ -499,6 +490,8 @@ but this one is yours.
         clone.style.opacity = "0.95";
         clone.style.cursor = "grabbing";
         document.body.appendChild(clone);
+
+        const endDrag = () => { isDragging = false; };
 
         const move = (ev) => {
           const dx = ev.clientX - startX;
@@ -558,6 +551,7 @@ but this one is yours.
           if (!onBoard){
             clone.remove();
             dropIntoTray();
+            endDrag();
             return;
           }
 
@@ -607,6 +601,7 @@ but this one is yours.
           clone.remove();
           modal.classList.remove("open");
           checkSolved();
+          endDrag();
         };
 
         window.addEventListener("pointermove", move);
@@ -676,7 +671,6 @@ but this one is yours.
     }
   }
 
-  /* Buttons */
   document.getElementById("shuffleBtn").addEventListener("click", shuffleTray);
   document.getElementById("restartBtn").addEventListener("click", init);
   document.getElementById("guideBtn").addEventListener("click", () => {
@@ -691,10 +685,8 @@ but this one is yours.
     createPieces();
   }
 
-  window.addEventListener("resize", () => {
-    clearTimeout(window.__rz);
-    window.__rz = setTimeout(init, 250);
-  });
+  // ✅ مهم: مفيش init على resize (عشان الموبايل مايعيدش اللعبة مع حركة الشريط)
+  // (لكن ما زلنا نعمل resize للكونفيتي فقط)
 
   const preload = new Image();
   preload.onload = () => init();
