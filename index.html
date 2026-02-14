@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="ar">
+<html lang="en">
 <head>
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1"/>
@@ -7,19 +7,22 @@
 
   <style>
     :root{
-      --text:#e9eefc;
-      --muted:rgba(233,238,252,0.78);
-      --card:rgba(255,255,255,0.08);
-      --border:rgba(255,255,255,0.15);
-      --shadow:0 25px 70px rgba(0,0,0,0.5);
-      --accent:#ff4d7d;
+      --pink1:#ff4d8d;
+      --pink2:#ff7eb3;
+      --pink3:#ffd6e8;
+      --soft:#fff5fa;
 
-      /* tray piece size set by JS */
-      --trayW: 66px;
-      --trayH: 110px;
+      --text:#5a0040;
+      --muted:rgba(90,0,64,0.65);
+
+      --card:rgba(255,255,255,0.70);
+      --border:rgba(255,105,180,0.25);
+      --shadow:0 25px 60px rgba(255,105,180,0.28);
+
+      --trayW:66px;
+      --trayH:110px;
     }
 
-    /* ✅ سكرول عادي للصفحة */
     html, body{
       overscroll-behavior-y: none;
     }
@@ -27,27 +30,64 @@
     body{
       margin:0;
       font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial;
-      color:var(--text);
       min-height:100vh;
       display:flex;
       align-items:flex-start;
       justify-content:center;
-      padding: 18px 0;
+      padding:20px 0;
+      color:var(--text);
+
       background:
-        radial-gradient(900px 600px at 20% 10%, rgba(255,77,125,0.25), transparent 60%),
-        radial-gradient(900px 700px at 80% 90%, rgba(255,179,199,0.18), transparent 60%),
-        linear-gradient(180deg,#0b0f19,#1a1030);
-      touch-action: pan-y; /* يسمح بالسكرول العمودي */
+        radial-gradient(circle at 18% 22%, rgba(255,255,255,0.35), transparent 40%),
+        radial-gradient(circle at 82% 72%, rgba(255,255,255,0.35), transparent 42%),
+        linear-gradient(135deg,var(--pink2),var(--pink1));
+      touch-action: pan-y;
+      overflow-x:hidden;
+      position:relative;
     }
 
-    /* ✅ اسمح بالسكرول حتى لو لمست البورد/التراي */
-    #board, #tray{
-      touch-action: pan-y;
+    /* soft hearts pattern */
+    body::before{
+      content:"❤ ❤ ❤ ❤ ❤ ❤ ❤ ❤ ❤ ❤ ❤ ❤ ❤ ❤ ❤";
+      position:fixed;
+      inset:-40px;
+      font-size:84px;
+      line-height:1.9;
+      letter-spacing:20px;
+      color:rgba(255,255,255,0.08);
+      display:flex;
+      flex-wrap:wrap;
+      align-content:center;
+      justify-content:center;
+      pointer-events:none;
+      z-index:0;
+      transform:rotate(-8deg);
     }
-    /* ✅ امنع المتصفح يفسر سحب القطعة كسكرول */
-    .piece{
-      touch-action: none;
+
+    /* floating hearts */
+    .float-hearts{
+      position:fixed;
+      inset:0;
+      pointer-events:none;
+      z-index:1;
+      overflow:hidden;
     }
+    .heart{
+      position:absolute;
+      bottom:-40px;
+      font-size:22px;
+      opacity:0.25;
+      animation: rise linear infinite;
+      filter: blur(0.2px);
+    }
+    @keyframes rise{
+      from{ transform: translateY(0) translateX(0) scale(1); }
+      to{ transform: translateY(-120vh) translateX(-30px) scale(1.25); }
+    }
+
+    /* scroll allowed over board/tray, pieces handle drag */
+    #board, #tray{ touch-action: pan-y; }
+    .piece{ touch-action: none; }
 
     #confetti{
       position:fixed;
@@ -59,12 +99,14 @@
     .card{
       width:min(1040px,95vw);
       background:var(--card);
+      backdrop-filter:blur(14px);
+      border-radius:26px;
+      padding:22px;
       border:1px solid var(--border);
-      border-radius:22px;
-      padding:20px;
       box-shadow:var(--shadow);
-      backdrop-filter:blur(12px);
-      box-sizing: border-box;
+      box-sizing:border-box;
+      z-index:2;
+      position:relative;
     }
 
     .top{
@@ -83,17 +125,26 @@
     }
 
     .badge{
-      width:40px;height:40px;
-      border-radius:14px;
+      width:44px;height:44px;
+      border-radius:16px;
       display:grid;place-items:center;
-      background:rgba(255,77,125,0.18);
-      border:1px solid rgba(255,77,125,0.35);
-      box-shadow:0 10px 30px rgba(255,77,125,0.12);
+      background:rgba(255,77,141,0.16);
+      border:1px solid rgba(255,77,141,0.25);
+      box-shadow:0 10px 30px rgba(255,105,180,0.18);
       font-size:18px;
     }
 
-    h1{ margin:0 0 4px; font-size:18px; }
-    p{ margin:0; color:var(--muted); line-height:1.6; }
+    h1{
+      margin:0 0 4px;
+      font-size:22px;
+      color:#b3005e;
+      letter-spacing:0.2px;
+    }
+    p{
+      margin:0;
+      color:var(--muted);
+      line-height:1.6;
+    }
 
     .row{
       display:flex;
@@ -103,23 +154,22 @@
     }
 
     .btn{
-      padding:10px 14px;
-      border-radius:14px;
+      padding:10px 16px;
+      border-radius:20px;
       font-weight:800;
       cursor:pointer;
-      border:1px solid rgba(255,255,255,0.20);
-      background:rgba(255,255,255,0.10);
-      color:var(--text);
-      transition:transform .08s ease, background .2s ease;
+      border:none;
+      background:linear-gradient(135deg,var(--pink1),var(--pink2));
+      color:white;
+      box-shadow:0 10px 24px rgba(255,105,180,0.40);
+      transition:transform .12s ease, box-shadow .2s ease, filter .2s ease;
     }
-    .btn:hover{ background:rgba(255,255,255,0.16); }
-    .btn:active{ transform:scale(0.98); }
-
-    .btn.primary{
-      background:rgba(255,77,125,0.18);
-      border-color:rgba(255,77,125,0.35);
+    .btn:hover{
+      transform:translateY(-2px);
+      box-shadow:0 14px 28px rgba(255,105,180,0.55);
+      filter:saturate(1.05);
     }
-    .btn.primary:hover{ background:rgba(255,77,125,0.24); }
+    .btn:active{ transform:translateY(0); }
 
     .grid{
       display:grid;
@@ -130,16 +180,16 @@
     @media(max-width:860px){ .grid{ grid-template-columns:1fr; } }
 
     .panel{
-      background:rgba(0,0,0,0.25);
-      border:1px solid rgba(255,255,255,0.12);
-      border-radius:18px;
+      background:rgba(255,255,255,0.35);
+      border:1px solid rgba(255,105,180,0.18);
+      border-radius:20px;
       padding:12px;
-      box-sizing: border-box;
+      box-sizing:border-box;
     }
 
     .title{
       font-size:13px;
-      color:rgba(233,238,252,0.72);
+      color:rgba(90,0,64,0.70);
       margin:0 0 10px;
       display:flex;
       justify-content:space-between;
@@ -147,50 +197,51 @@
     }
     .progress{
       font-size:12px;
-      color:rgba(233,238,252,0.70);
+      color:rgba(90,0,64,0.65);
     }
 
     #board{
       position:relative;
       width:100%;
-      aspect-ratio: 9 / 16;
-      border-radius:16px;
+      aspect-ratio:9/16;
+      border-radius:20px;
       overflow:hidden;
-      background:rgba(255,255,255,0.06);
-      border:1px solid rgba(255,255,255,0.15);
+      background:white;
+      border:2px solid rgba(255,105,180,0.30);
+      box-shadow:0 14px 30px rgba(255,105,180,0.16);
     }
 
     #tray{
       display:flex;
       flex-wrap:wrap;
-      gap:10px;
+      gap:12px;
       min-height:120px;
       align-content:flex-start;
     }
 
     .piece{
-      width: var(--trayW);
-      height: var(--trayH);
-      border-radius:16px;
-      border:1px solid rgba(255,255,255,0.20);
-      background-image: var(--img);
-      background-size: var(--bgSize);
-      background-position: var(--bgPos);
+      width:var(--trayW);
+      height:var(--trayH);
+      border-radius:18px;
+      border:2px solid rgba(255,105,180,0.28);
+      background-image:var(--img);
+      background-size:var(--bgSize);
+      background-position:var(--bgPos);
       cursor:grab;
       user-select:none;
-      box-shadow:0 10px 25px rgba(0,0,0,0.20);
+      box-shadow:0 10px 22px rgba(255,105,180,0.22);
       transition:transform .12s ease, box-shadow .2s ease, border-color .2s ease;
     }
     .piece:hover{
-      transform:translateY(-1px);
-      border-color:rgba(255,255,255,0.30);
-      box-shadow:0 14px 35px rgba(0,0,0,0.28);
+      transform:translateY(-1px) scale(1.03);
+      border-color:rgba(255,105,180,0.40);
+      box-shadow:0 16px 30px rgba(255,105,180,0.28);
     }
     .piece:active{ cursor:grabbing; transform:scale(0.99); }
 
     .ghostSlot{
       position:absolute;
-      border:1px dashed rgba(255,255,255,0.18);
+      border:1px dashed rgba(255,77,141,0.25);
       border-radius:14px;
       pointer-events:none;
     }
@@ -198,14 +249,8 @@
     .hint{
       margin-top:8px;
       font-size:13px;
-      color:rgba(233,238,252,0.75);
-    }
-
-    .tiny{
-      margin-top:10px;
-      font-size:12px;
-      color:rgba(233,238,252,0.55);
-      line-height:1.5;
+      color:rgba(90,0,64,0.78);
+      font-weight:700;
     }
 
     .modal{
@@ -215,19 +260,19 @@
       align-items:center;
       justify-content:center;
       padding:18px;
-      background:rgba(0,0,0,0.60);
-      backdrop-filter:blur(6px);
+      background:rgba(255,105,180,0.20);
+      backdrop-filter:blur(8px);
       z-index:9999;
     }
     .modal.open{ display:flex; }
 
     .modalCard{
       width:min(560px,92vw);
-      background:rgba(255,255,255,0.10);
-      border:1px solid rgba(255,255,255,0.20);
-      border-radius:20px;
-      box-shadow:var(--shadow);
-      padding:16px;
+      background:linear-gradient(135deg,#fff0f6,#ffe6f2);
+      border-radius:24px;
+      padding:18px;
+      border:1px solid rgba(255,105,180,0.30);
+      box-shadow:0 22px 44px rgba(255,105,180,0.40);
     }
 
     .modalTop{
@@ -237,27 +282,35 @@
       gap:10px;
       margin-bottom:8px;
     }
-    .modalTop h2{ margin:0; font-size:16px; }
+    .modalTop h2{
+      margin:0;
+      font-size:16px;
+      color:#b3005e;
+      letter-spacing:0.2px;
+    }
 
     .close{
-      background:rgba(255,255,255,0.10);
-      border:1px solid rgba(255,255,255,0.16);
-      color:var(--text);
-      border-radius:12px;
-      padding:8px 10px;
+      background:linear-gradient(135deg,var(--pink1),var(--pink2));
+      border:none;
+      color:white;
+      border-radius:14px;
+      padding:8px 12px;
       cursor:pointer;
-      font-weight:800;
+      font-weight:900;
+      box-shadow:0 10px 22px rgba(255,105,180,0.35);
     }
 
     .msg{
       white-space:pre-wrap;
-      color:rgba(233,238,252,0.92);
+      color:rgba(90,0,64,0.92);
       line-height:1.7;
+      font-weight:650;
     }
   </style>
 </head>
 
 <body>
+  <div class="float-hearts" aria-hidden="true" id="floatHearts"></div>
   <canvas id="confetti"></canvas>
 
   <div class="card">
@@ -265,14 +318,14 @@
       <div class="brand">
         <div class="badge">💘</div>
         <div>
-          <h1>بازل صغير… ومفاجأة</h1>
-          <p>ركّب الصورة. أول ما تظبط… الرسالة هتظهر لوحدها.</p>
+          <h1>Solve the puzzle 👇🏻 ♥️</h1>
+          <p></p>
         </div>
       </div>
     </div>
 
     <div class="row">
-      <button class="btn primary" id="shuffleBtn">Shuffle</button>
+      <button class="btn" id="shuffleBtn">Shuffle</button>
       <button class="btn" id="restartBtn">Restart</button>
       <button class="btn" id="guideBtn">Toggle Guide</button>
     </div>
@@ -290,7 +343,6 @@
       <div class="panel">
         <div class="title"><span>Pieces tray</span></div>
         <div id="tray"></div>
-        <div class="tiny">✅ سكرول الصفحة شغال. السحب يمنع السكرول بس وقت تحريك القطعة.</div>
       </div>
     </div>
   </div>
@@ -337,7 +389,7 @@ but this one is yours.
   let showGuide = true;
   let solvedOnce = false;
 
-  // ✅ امنع السكرول/refresh فقط أثناء السحب
+  // prevent scroll/refresh only while dragging
   let isDragging = false;
   document.addEventListener("touchmove", (e) => {
     if (isDragging) e.preventDefault();
@@ -415,7 +467,7 @@ but this one is yours.
     pieces.forEach(p => tray.appendChild(p));
     attachDrag();
     updateProgress();
-    hint.textContent = "ابدأ… ورتّبها واحدة واحدة 🙂";
+    hint.textContent = "Start 🙂";
   }
 
   function placedCount(){
@@ -432,7 +484,7 @@ but this one is yours.
 
     const placed = [...board.querySelectorAll(".piece")];
     if (placed.length !== ROWS*COLS){
-      hint.textContent = `متحطّط ${placed.length}/${ROWS*COLS}.`;
+      hint.textContent = `Placed ${placed.length}/${ROWS*COLS}`;
       return;
     }
 
@@ -451,7 +503,7 @@ but this one is yours.
         startConfetti();
       }
     } else {
-      hint.textContent = "قربت… في قطع متبدلة 🙂";
+      hint.textContent = "Almost… 🙂";
       modal.classList.remove("open");
     }
   }
@@ -469,11 +521,9 @@ but this one is yours.
       p.dataset.dragBound = "1";
 
       p.addEventListener("pointerdown", (e) => {
-        // مهم: منع السلوك الافتراضي للقطعة نفسها فقط
         e.preventDefault();
         p.setPointerCapture(e.pointerId);
 
-        // ✅ اقفل السكرول وقت السحب فقط
         isDragging = true;
 
         const isPlaced = (p.dataset.placed === "1");
@@ -615,7 +665,7 @@ but this one is yours.
     });
   }
 
-  /* Confetti */
+  // Confetti
   const confettiCanvas = document.getElementById("confetti");
   const ctx = confettiCanvas.getContext("2d");
   let confetti = [];
@@ -676,6 +726,21 @@ but this one is yours.
     }
   }
 
+  // Floating hearts generator
+  const floatHearts = document.getElementById("floatHearts");
+  const HEARTS = ["❤","💗","💖","💘","💕"];
+  for(let i=0;i<14;i++){
+    const h = document.createElement("div");
+    h.className = "heart";
+    h.textContent = HEARTS[Math.floor(Math.random()*HEARTS.length)];
+    h.style.left = Math.floor(Math.random()*100) + "vw";
+    h.style.animationDuration = (8 + Math.random()*8).toFixed(1) + "s";
+    h.style.animationDelay = (Math.random()*6).toFixed(1) + "s";
+    h.style.fontSize = (18 + Math.random()*26).toFixed(0) + "px";
+    h.style.opacity = (0.12 + Math.random()*0.18).toFixed(2);
+    floatHearts.appendChild(h);
+  }
+
   document.getElementById("shuffleBtn").addEventListener("click", shuffleTray);
   document.getElementById("restartBtn").addEventListener("click", init);
   document.getElementById("guideBtn").addEventListener("click", () => {
@@ -690,11 +755,10 @@ but this one is yours.
     createPieces();
   }
 
-  // ✅ مهم: مفيش init على resize عشان الموبايل مايعيدش اللعبة
   const preload = new Image();
   preload.onload = () => init();
   preload.onerror = () => {
-    hint.textContent = "الصورة مش بتتحمل. تأكد إنها اسمها puzzle.jpg وفي نفس مكان index.html.";
+    hint.textContent = "Image not loading. Ensure it's named puzzle.jpg and in the same folder as index.html.";
   };
   preload.src = IMAGE_SRC;
 </script>
