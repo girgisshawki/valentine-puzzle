@@ -13,6 +13,10 @@
       --border:rgba(255,255,255,0.15);
       --shadow:0 25px 70px rgba(0,0,0,0.5);
       --accent:#ff4d7d;
+
+      /* tray piece size will be set by JS */
+      --trayW: 66px;
+      --trayH: 110px;
     }
 
     body{
@@ -146,12 +150,13 @@
       flex-wrap:wrap;
       gap:10px;
       min-height:120px;
+      align-content:flex-start;
     }
 
     /* Pieces */
     .piece{
-      width:66px;
-      height:66px;
+      width: var(--trayW);
+      height: var(--trayH);
       border-radius:16px;
       border:1px solid rgba(255,255,255,0.20);
       background-image: var(--img);
@@ -273,7 +278,7 @@
       <div class="panel">
         <div class="title"><span>Pieces tray</span></div>
         <div id="tray"></div>
-        <div class="tiny">على الموبايل: اضغط مطوّل واسحب. لو حسّيت القطع صغيرة، اعمل Zoom بسيط.</div>
+        <div class="tiny">القطع برا دلوقتي بقت بنفس نسبة القطع الحقيقية. على الموبايل: اضغط مطوّل واسحب.</div>
       </div>
     </div>
   </div>
@@ -360,6 +365,20 @@ but this one is yours.
     }
   }
 
+  // يجعل قطع الـ tray مستطيلات بنفس نسبة السلوط الحقيقية
+  function updateTrayPieceSize(){
+    const boardRect = board.getBoundingClientRect();
+    const slotW = boardRect.width / COLS;
+    const slotH = boardRect.height / ROWS;
+
+    const scale = 0.58; // حجم مناسب للتراي
+    const trayW = Math.max(48, Math.floor(slotW * scale));
+    const trayH = Math.max(70, Math.floor(slotH * scale));
+
+    document.documentElement.style.setProperty("--trayW", trayW + "px");
+    document.documentElement.style.setProperty("--trayH", trayH + "px");
+  }
+
   function createPieces(){
     for (let r=0; r<ROWS; r++){
       for (let c=0; c<COLS; c++){
@@ -381,7 +400,7 @@ but this one is yours.
 
     pieces = shuffle(pieces);
     pieces.forEach(p => tray.appendChild(p));
-    attachDrag(); // مهم: بتخلي السحب شغال للتراي + البورد
+    attachDrag();
     updateProgress();
     hint.textContent = "ابدأ… ورتّبها واحدة واحدة 🙂";
   }
@@ -431,10 +450,9 @@ but this one is yours.
     s.forEach(x => tray.appendChild(x));
   }
 
-  /* ===== Drag behavior (no double click needed) ===== */
+  /* ===== Drag behavior (drag from tray and from board) ===== */
   function attachDrag(){
     pieces.forEach(p => {
-      // Avoid attaching twice if init runs again
       if (p.dataset.dragBound === "1") return;
       p.dataset.dragBound = "1";
 
@@ -447,10 +465,8 @@ but this one is yours.
         const startX = e.clientX, startY = e.clientY;
         const origRect = p.getBoundingClientRect();
 
-        // hide original during drag
         p.style.visibility = "hidden";
 
-        // clone for smooth dragging
         const clone = p.cloneNode(true);
         clone.style.position = "fixed";
         clone.style.left = origRect.left + "px";
@@ -536,15 +552,12 @@ but this one is yours.
 
           const occupant = board.querySelector(`.piece[data-slot='${targetIdx}']`);
 
-          // If target slot occupied by a different piece
           if (occupant && occupant !== p){
             if (isPlaced && fromSlot !== null && fromSlot !== targetIdx){
-              // swap occupant back to the original slot if possible
               const backOcc = board.querySelector(`.piece[data-slot='${fromSlot}']`);
               if (!backOcc || backOcc === p){
                 snapPieceToSlot(occupant, fromSlot);
               } else {
-                // if original slot not free, send occupant to tray
                 occupant.dataset.placed = "0";
                 occupant.removeAttribute("data-slot");
                 occupant.style.position = "";
@@ -556,7 +569,6 @@ but this one is yours.
                 tray.appendChild(occupant);
               }
             } else {
-              // coming from tray: push occupant to tray
               occupant.dataset.placed = "0";
               occupant.removeAttribute("data-slot");
               occupant.style.position = "";
@@ -569,7 +581,6 @@ but this one is yours.
             }
           }
 
-          // snap dragged piece
           snapPieceToSlot(p, targetIdx);
 
           clone.remove();
@@ -655,16 +666,15 @@ but this one is yours.
   function init(){
     clearAll();
     makeSlots();
+    updateTrayPieceSize();  // <-- هنا التعديل الأساسي لقطع التراي
     createPieces();
   }
 
-  // Restart on resize to keep slot sizes correct
   window.addEventListener("resize", () => {
     clearTimeout(window.__rz);
     window.__rz = setTimeout(init, 250);
   });
 
-  // Ensure image is loadable
   const preload = new Image();
   preload.onload = () => init();
   preload.onerror = () => {
