@@ -9,7 +9,6 @@
     :root{
       --pink1:#ff4d8d;
       --pink2:#ff7eb3;
-      --soft:#fff5fa;
 
       --text:#5a0040;
       --muted:rgba(90,0,64,0.65);
@@ -43,7 +42,6 @@
       position:relative;
     }
 
-    /* soft hearts wallpaper */
     body::before{
       content:"❤ ❤ ❤ ❤ ❤ ❤ ❤ ❤ ❤ ❤ ❤ ❤ ❤ ❤ ❤";
       position:fixed;
@@ -61,7 +59,7 @@
       transform:rotate(-8deg);
     }
 
-    /* floating hearts (stronger animation) */
+    /* floating hearts */
     .float-hearts{
       position:fixed;
       inset:0;
@@ -83,7 +81,6 @@
       will-change: transform, opacity, filter;
       filter: blur(0.15px);
     }
-
     @keyframes rise{
       from{ transform: translateY(0) translateX(0) rotate(0deg) scale(var(--scale)); }
       to  { transform: translateY(-125vh) translateX(var(--drift)) rotate(var(--rot)) scale(calc(var(--scale) * 1.25)); }
@@ -94,10 +91,9 @@
     }
     @keyframes twinkle{
       0%,100%{ opacity:0.10; filter:blur(0.2px); }
-      50%{ opacity:0.35; filter:blur(0px); }
+      50%{ opacity:0.38; filter:blur(0px); }
     }
 
-    /* scroll allowed over board/tray, pieces handle drag */
     #board, #tray{ touch-action: pan-y; }
     .piece{ touch-action: none; }
 
@@ -129,12 +125,7 @@
       flex-wrap:wrap;
       margin-bottom:12px;
     }
-
-    .brand{
-      display:flex;
-      gap:10px;
-      align-items:center;
-    }
+    .brand{ display:flex; gap:10px; align-items:center; }
 
     .badge{
       width:44px;height:44px;
@@ -146,20 +137,10 @@
       font-size:18px;
     }
 
-    h1{
-      margin:0 0 4px;
-      font-size:22px;
-      color:#b3005e;
-      letter-spacing:0.2px;
-    }
+    h1{ margin:0 0 4px; font-size:22px; color:#b3005e; }
     p{ margin:0; color:var(--muted); line-height:1.6; }
 
-    .row{
-      display:flex;
-      gap:10px;
-      flex-wrap:wrap;
-      margin:12px 0 14px;
-    }
+    .row{ display:flex; gap:10px; flex-wrap:wrap; margin:12px 0 14px; }
 
     .btn{
       padding:10px 16px;
@@ -177,7 +158,6 @@
       box-shadow:0 14px 28px rgba(255,105,180,0.55);
       filter:saturate(1.05);
     }
-    .btn:active{ transform:translateY(0); }
 
     .grid{
       display:grid;
@@ -203,10 +183,7 @@
       justify-content:space-between;
       gap:10px;
     }
-    .progress{
-      font-size:12px;
-      color:rgba(90,0,64,0.65);
-    }
+    .progress{ font-size:12px; color:rgba(90,0,64,0.65); }
 
     #board{
       position:relative;
@@ -247,7 +224,6 @@
     }
     .piece:active{ cursor:grabbing; transform:scale(0.99); }
 
-    /* ✅ locked piece look */
     .piece.locked{
       cursor:default;
       box-shadow:0 10px 22px rgba(0,0,0,0.08);
@@ -270,7 +246,7 @@
       font-weight:800;
     }
 
-    /* Envelope appears when fully solved */
+    /* ✅ Bigger envelope overlay inside the board */
     .envelopeWrap{
       position:absolute;
       inset:0;
@@ -278,37 +254,41 @@
       align-items:center;
       justify-content:center;
       z-index:50;
-      background:linear-gradient(180deg, rgba(255,255,255,0.10), rgba(255,255,255,0.25));
-      backdrop-filter: blur(2px);
+      background:linear-gradient(180deg, rgba(255,255,255,0.10), rgba(255,255,255,0.32));
+      backdrop-filter: blur(3px);
     }
     .envelopeWrap.show{ display:flex; }
 
     .envelopeBtn{
+      width:min(92%, 520px);
+      max-width:92%;
       border:none;
       cursor:pointer;
-      background:rgba(255,255,255,0.80);
+      background:rgba(255,255,255,0.90);
       border:2px solid rgba(255,105,180,0.35);
-      border-radius:22px;
-      padding:16px 18px;
-      box-shadow:0 18px 40px rgba(255,105,180,0.30);
+      border-radius:26px;
+      padding:22px 18px;
+      box-shadow:0 24px 60px rgba(255,105,180,0.34);
       display:flex;
       flex-direction:column;
       align-items:center;
-      gap:10px;
-      transform:translateY(0);
-      transition:transform .15s ease, box-shadow .2s ease;
+      gap:14px;
+      transition:transform .18s ease, box-shadow .2s ease;
     }
     .envelopeBtn:hover{
-      transform:translateY(-3px);
-      box-shadow:0 26px 55px rgba(255,105,180,0.38);
+      transform:translateY(-4px) scale(1.01);
+      box-shadow:0 32px 80px rgba(255,105,180,0.40);
     }
+
     .envelopeIcon{
-      width:88px;height:62px;
-      border-radius:16px;
+      width:min(86%, 380px);
+      aspect-ratio: 16/10;
+      border-radius:22px;
       position:relative;
       background:linear-gradient(135deg,#fff0f6,#ffe6f2);
       border:2px solid rgba(255,105,180,0.35);
       overflow:hidden;
+      box-shadow:0 18px 40px rgba(255,105,180,0.18);
     }
     .envelopeIcon::before{
       content:"";
@@ -317,29 +297,32 @@
       background:
         linear-gradient(135deg, transparent 48%, rgba(255,105,180,0.22) 49%, rgba(255,105,180,0.22) 51%, transparent 52%),
         linear-gradient(225deg, transparent 48%, rgba(255,105,180,0.22) 49%, rgba(255,105,180,0.22) 51%, transparent 52%);
-      opacity:0.9;
+      opacity:0.95;
     }
     .envelopeIcon::after{
       content:"❤";
       position:absolute;
       left:50%; top:50%;
       transform:translate(-50%,-45%);
-      color:rgba(179,0,94,0.85);
-      font-size:20px;
+      color:rgba(179,0,94,0.88);
+      font-size:26px;
       text-shadow:0 10px 20px rgba(255,105,180,0.25);
     }
+
     .envelopeText{
-      font-weight:900;
+      font-weight:1000;
       color:#b3005e;
       letter-spacing:0.2px;
+      font-size:18px;
     }
     .envelopeSub{
-      font-size:12px;
-      color:rgba(90,0,64,0.65);
-      font-weight:800;
-      margin-top:-6px;
+      font-size:13px;
+      color:rgba(90,0,64,0.66);
+      font-weight:900;
+      margin-top:-10px;
     }
 
+    /* ✅ Full-screen big letter modal */
     .modal{
       position:fixed;
       inset:0;
@@ -347,19 +330,22 @@
       align-items:center;
       justify-content:center;
       padding:18px;
-      background:rgba(255,105,180,0.20);
-      backdrop-filter:blur(8px);
+      background:rgba(255,105,180,0.22);
+      backdrop-filter:blur(10px);
       z-index:9999;
     }
     .modal.open{ display:flex; }
 
     .modalCard{
-      width:min(560px,92vw);
+      width:min(740px,94vw);
+      min-height:min(70vh, 620px);
       background:linear-gradient(135deg,#fff0f6,#ffe6f2);
-      border-radius:24px;
+      border-radius:28px;
       padding:18px;
       border:1px solid rgba(255,105,180,0.30);
-      box-shadow:0 22px 44px rgba(255,105,180,0.40);
+      box-shadow:0 28px 70px rgba(255,105,180,0.42);
+      display:flex;
+      flex-direction:column;
     }
 
     .modalTop{
@@ -367,11 +353,11 @@
       align-items:center;
       justify-content:space-between;
       gap:10px;
-      margin-bottom:8px;
+      margin-bottom:10px;
     }
     .modalTop h2{
       margin:0;
-      font-size:16px;
+      font-size:18px;
       color:#b3005e;
       letter-spacing:0.2px;
     }
@@ -380,18 +366,27 @@
       background:linear-gradient(135deg,var(--pink1),var(--pink2));
       border:none;
       color:white;
-      border-radius:14px;
-      padding:8px 12px;
+      border-radius:16px;
+      padding:10px 14px;
       cursor:pointer;
-      font-weight:900;
+      font-weight:1000;
       box-shadow:0 10px 22px rgba(255,105,180,0.35);
     }
 
     .msg{
       white-space:pre-wrap;
       color:rgba(90,0,64,0.92);
-      line-height:1.7;
-      font-weight:750;
+      line-height:1.85;
+      font-weight:800;
+      font-size:18px;
+      padding:10px 4px 0;
+    }
+
+    @media (max-width:520px){
+      .modalCard{ min-height:72vh; }
+      .msg{ font-size:17px; }
+      .envelopeBtn{ width:92%; padding:18px 16px; }
+      .envelopeText{ font-size:17px; }
     }
   </style>
 </head>
@@ -503,7 +498,6 @@ Happy Valentine's Day my lovely Emy ♥️ ♥️`;
   }
 
   function clearAll(){
-    // keep envelopeWrap element (already inside board)
     [...board.querySelectorAll(".ghostSlot")].forEach(x => x.remove());
     [...board.querySelectorAll(".piece")].forEach(x => x.remove());
     tray.innerHTML = "";
@@ -613,10 +607,7 @@ Happy Valentine's Day my lovely Emy ♥️ ♥️`;
   function shuffleTray(){
     const unplaced = [...tray.querySelectorAll(".piece")].filter(p => p.dataset.locked !== "1");
     const s = shuffle(unplaced);
-    // keep locked (shouldn't exist in tray, but just in case)
-    const lockedInTray = [...tray.querySelectorAll(".piece")].filter(p => p.dataset.locked === "1");
     tray.innerHTML = "";
-    lockedInTray.forEach(x => tray.appendChild(x));
     s.forEach(x => tray.appendChild(x));
   }
 
@@ -626,7 +617,6 @@ Happy Valentine's Day my lovely Emy ♥️ ♥️`;
       p.dataset.dragBound = "1";
 
       p.addEventListener("pointerdown", (e) => {
-        // ✅ locked piece: don't move
         if (p.dataset.locked === "1") return;
 
         e.preventDefault();
@@ -685,7 +675,6 @@ Happy Valentine's Day my lovely Emy ♥️ ♥️`;
         };
 
         const returnToOrigin = () => {
-          // if it started in board, return to its old slot; else to tray
           if (startedInBoard && fromSlot !== null){
             snapPieceToSlot(p, fromSlot);
           } else {
@@ -705,7 +694,6 @@ Happy Valentine's Day my lovely Emy ♥️ ♥️`;
         };
 
         const dropIntoTray = () => {
-          // if piece was locked (shouldn't happen), refuse
           if (p.dataset.locked === "1"){ returnToOrigin(); return; }
 
           p.dataset.placed = "0";
@@ -763,7 +751,6 @@ Happy Valentine's Day my lovely Emy ♥️ ♥️`;
 
           const occupant = board.querySelector(`.piece[data-slot='${targetIdx}']`);
 
-          // ✅ if target slot has locked piece -> cancel drop
           if (isLocked(occupant)){
             clone.remove();
             p.style.visibility = "";
@@ -772,15 +759,12 @@ Happy Valentine's Day my lovely Emy ♥️ ♥️`;
             return;
           }
 
-          // if target occupied by movable piece, swap logic
           if (occupant && occupant !== p){
-            // if dragged piece started on board: try move occupant back to fromSlot (only if fromSlot exists and not locked)
             if (startedInBoard && fromSlot !== null && fromSlot !== targetIdx){
               const backOcc = board.querySelector(`.piece[data-slot='${fromSlot}']`);
               if (!backOcc){
                 snapPieceToSlot(occupant, fromSlot);
               } else {
-                // if back slot occupied, send occupant to tray (only if it's not locked)
                 if (!isLocked(occupant)){
                   occupant.dataset.placed = "0";
                   occupant.removeAttribute("data-slot");
@@ -794,7 +778,6 @@ Happy Valentine's Day my lovely Emy ♥️ ♥️`;
                 }
               }
             } else {
-              // dragged from tray: move occupant to tray
               if (!isLocked(occupant)){
                 occupant.dataset.placed = "0";
                 occupant.removeAttribute("data-slot");
