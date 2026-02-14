@@ -1,0 +1,375 @@
+<!doctype html>
+<html lang="ar">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Valentine Puzzle</title>
+  <style>
+    body{
+      margin:0; font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial;
+      background:#0b0f19; color:#e9eefc; min-height:100vh;
+      display:flex; align-items:center; justify-content:center;
+    }
+    .card{
+      width:min(980px, 95vw);
+      background:rgba(255,255,255,0.06);
+      border:1px solid rgba(255,255,255,0.12);
+      border-radius:20px;
+      padding:18px;
+      box-shadow:0 20px 60px rgba(0,0,0,0.35);
+    }
+    h1{ margin:0 0 8px; font-size:18px; }
+    p{ margin:0 0 14px; color:rgba(233,238,252,0.82); line-height:1.6; }
+    .row{ display:flex; gap:12px; flex-wrap:wrap; align-items:center; margin-bottom:12px; }
+    .btn{
+      padding:10px 14px; border-radius:14px;
+      background:rgba(255,255,255,0.12);
+      border:1px solid rgba(255,255,255,0.18);
+      color:#e9eefc; cursor:pointer; font-weight:700;
+    }
+    .btn:hover{ background:rgba(255,255,255,0.16); }
+    .grid{
+      display:grid; grid-template-columns: 1fr 1fr; gap:14px; align-items:start;
+    }
+    @media (max-width: 860px){ .grid{ grid-template-columns: 1fr; } }
+    .panel{
+      background:rgba(0,0,0,0.25);
+      border:1px dashed rgba(255,255,255,0.16);
+      border-radius:16px;
+      padding:12px;
+    }
+    .title{ font-size:13px; color:rgba(233,238,252,0.70); margin:0 0 8px; }
+    #board{
+      position:relative;
+      width:100%;
+      aspect-ratio: 1 / 1;
+      border-radius:14px;
+      overflow:hidden;
+      background:rgba(255,255,255,0.06);
+      border:1px solid rgba(255,255,255,0.14);
+      touch-action:none;
+    }
+    #tray{ display:flex; flex-wrap:wrap; gap:10px; min-height:120px; }
+    .piece{
+      width:72px; height:72px;
+      border-radius:14px;
+      border:1px solid rgba(255,255,255,0.18);
+      background-size: var(--bgSize);
+      background-position: var(--bgPos);
+      background-image: var(--img);
+      cursor:grab;
+      user-select:none;
+      touch-action:none;
+    }
+    .piece:active{ cursor:grabbing; }
+    .ghostSlot{
+      position:absolute;
+      border:1px dashed rgba(255,255,255,0.18);
+      border-radius:12px;
+      pointer-events:none;
+    }
+    .success{
+      margin-top:12px; padding:14px; border-radius:16px;
+      background:rgba(60,255,170,0.12);
+      border:1px solid rgba(60,255,170,0.22);
+      display:none;
+    }
+    .success h2{ margin:0 0 6px; font-size:16px; }
+    .success .msg{ white-space:pre-wrap; color:rgba(233,238,252,0.92); line-height:1.6; }
+    .hint{ font-size:13px; color:rgba(233,238,252,0.72); margin-top:10px; }
+    .tiny{ font-size:12px; color:rgba(233,238,252,0.55); margin-top:10px; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>🧩 بازل صغير… ومفاجأة</h1>
+    <p>اسحب القطع من “التراي” وحطّها على اللوحة. أول ما تركّب الصورة صح… الرسالة هتظهر لوحدها.</p>
+
+    <div class="row">
+      <button class="btn" id="shuffleBtn">Shuffle</button>
+      <button class="btn" id="restartBtn">Restart</button>
+      <button class="btn" id="guideBtn">Toggle Guide</button>
+    </div>
+
+    <div class="grid">
+      <div class="panel">
+        <div class="title">Board</div>
+        <div id="board"></div>
+        <div class="hint" id="hint"></div>
+      </div>
+
+      <div class="panel">
+        <div class="title">Pieces tray</div>
+        <div id="tray"></div>
+        <div class="tiny">على الموبايل: اضغط مطوّل واسحب. تقدر كمان تعمل Zoom لو محتاج دقة.</div>
+      </div>
+    </div>
+
+    <div class="success" id="successBox">
+      <h2>Unlocked 💌</h2>
+      <div class="msg" id="finalMsg"></div>
+    </div>
+  </div>
+
+<script>
+/** ====== عدّل دول بس لو حابب ====== **/
+const ROWS = 3;
+const COLS = 3;
+
+const finalMessage =
+`Happy Valentine’s Day, Emily 🌹
+
+You make ordinary moments feel rare.
+I’m grateful for you — today and always.
+
+— Girgis`;
+/** =================================== **/
+
+// صورة مدمجة (SVG) عشان ما ترفعش أي ملفات إضافية
+const SVG = `
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="800">
+  <defs>
+    <radialGradient id="g" cx="50%" cy="35%" r="70%">
+      <stop offset="0%" stop-color="#ffb3c7"/>
+      <stop offset="45%" stop-color="#ff4d7d"/>
+      <stop offset="100%" stop-color="#2b0b17"/>
+    </radialGradient>
+    <filter id="glow" x="-40%" y="-40%" width="180%" height="180%">
+      <feGaussianBlur stdDeviation="10" result="b"/>
+      <feMerge>
+        <feMergeNode in="b"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+  <rect width="100%" height="100%" fill="url(#g)"/>
+  <g filter="url(#glow)">
+    <path d="M400 660
+             C 260 560, 160 460, 160 340
+             C 160 240, 230 170, 320 170
+             C 370 170, 410 200, 400 245
+             C 390 200, 430 170, 480 170
+             C 570 170, 640 240, 640 340
+             C 640 460, 540 560, 400 660 Z"
+          fill="rgba(255,255,255,0.22)"/>
+    <path d="M400 650
+             C 270 555, 175 460, 175 345
+             C 175 255, 236 190, 320 190
+             C 370 190, 405 225, 400 270
+             C 395 225, 430 190, 480 190
+             C 564 190, 625 255, 625 345
+             C 625 460, 530 555, 400 650 Z"
+          fill="rgba(255,255,255,0.12)"/>
+  </g>
+  <text x="50%" y="90%" text-anchor="middle"
+        font-family="system-ui,Segoe UI,Arial" font-size="42"
+        fill="rgba(255,255,255,0.88)">for Emily</text>
+</svg>`;
+const IMG = `url("data:image/svg+xml;charset=utf-8,${encodeURIComponent(SVG)}")`;
+
+const board = document.getElementById("board");
+const tray = document.getElementById("tray");
+const hint = document.getElementById("hint");
+const successBox = document.getElementById("successBox");
+const finalMsgEl = document.getElementById("finalMsg");
+finalMsgEl.textContent = finalMessage;
+
+let pieces = [];
+let showGuide = true;
+
+function shuffle(arr){
+  const a=[...arr];
+  for(let i=a.length-1;i>0;i--){
+    const j=Math.floor(Math.random()*(i+1));
+    [a[i],a[j]]=[a[j],a[i]];
+  }
+  return a;
+}
+
+function clearAll(){
+  board.innerHTML="";
+  tray.innerHTML="";
+  pieces=[];
+  successBox.style.display="none";
+  hint.textContent="";
+}
+
+function makeSlots(){
+  const rect = board.getBoundingClientRect();
+  const W = rect.width, H = rect.height;
+  const slotW = W / COLS, slotH = H / ROWS;
+
+  for(let r=0;r<ROWS;r++){
+    for(let c=0;c<COLS;c++){
+      const idx=r*COLS+c;
+      const s=document.createElement("div");
+      s.className="ghostSlot";
+      s.style.left=(c*slotW)+"px";
+      s.style.top=(r*slotH)+"px";
+      s.style.width=slotW+"px";
+      s.style.height=slotH+"px";
+      s.style.opacity=showGuide?"1":"0";
+      board.appendChild(s);
+    }
+  }
+}
+
+function createPieces(){
+  // قطعة تعرض جزء من الصورة: نستخدم background-size = COLS*100% ROWS*100%
+  for(let r=0;r<ROWS;r++){
+    for(let c=0;c<COLS;c++){
+      const correctIdx=r*COLS+c;
+      const d=document.createElement("div");
+      d.className="piece";
+      d.dataset.correct=String(correctIdx);
+      d.dataset.placed="0";
+      d.style.setProperty("--img", IMG);
+      d.style.setProperty("--bgSize", `${COLS*100}% ${ROWS*100}%`);
+      const posX = (c/(COLS-1||1))*100;
+      const posY = (r/(ROWS-1||1))*100;
+      d.style.setProperty("--bgPos", `${posX}% ${posY}%`);
+      pieces.push(d);
+    }
+  }
+  pieces = shuffle(pieces);
+  pieces.forEach(p=>tray.appendChild(p));
+  attachDrag();
+  hint.textContent = `Placed 0/${ROWS*COLS}.`;
+}
+
+function attachDrag(){
+  pieces.forEach(p=>{
+    p.addEventListener("pointerdown",(e)=>{
+      if(p.dataset.placed==="1") return;
+      p.setPointerCapture(e.pointerId);
+
+      const startX=e.clientX, startY=e.clientY;
+      const origRect=p.getBoundingClientRect();
+
+      const clone=p.cloneNode(true);
+      clone.style.position="fixed";
+      clone.style.left=origRect.left+"px";
+      clone.style.top=origRect.top+"px";
+      clone.style.zIndex="9999";
+      clone.style.opacity="0.95";
+      clone.style.cursor="grabbing";
+      document.body.appendChild(clone);
+
+      const move=(ev)=>{
+        const dx=ev.clientX-startX;
+        const dy=ev.clientY-startY;
+        clone.style.transform=`translate(${dx}px,${dy}px)`;
+      };
+
+      const up=(ev)=>{
+        p.releasePointerCapture(e.pointerId);
+        window.removeEventListener("pointermove", move);
+        window.removeEventListener("pointerup", up);
+
+        const boardRect=board.getBoundingClientRect();
+        const dropX=ev.clientX, dropY=ev.clientY;
+
+        const onBoard = dropX>=boardRect.left && dropX<=boardRect.right && dropY>=boardRect.top && dropY<=boardRect.bottom;
+
+        if(onBoard){
+          const localX=dropX-boardRect.left;
+          const localY=dropY-boardRect.top;
+          const slotW=boardRect.width/COLS;
+          const slotH=boardRect.height/ROWS;
+          const c=Math.max(0,Math.min(COLS-1,Math.floor(localX/slotW)));
+          const r=Math.max(0,Math.min(ROWS-1,Math.floor(localY/slotH)));
+          const targetIdx=r*COLS+c;
+
+          const occupied = !!board.querySelector(`.piece[data-slot='${targetIdx}']`);
+          if(!occupied){
+            p.dataset.slot=String(targetIdx);
+            p.dataset.placed="1";
+
+            // snap
+            p.style.position="absolute";
+            p.style.left=(c*slotW)+"px";
+            p.style.top=(r*slotH)+"px";
+            p.style.width=slotW+"px";
+            p.style.height=slotH+"px";
+            p.style.borderRadius="12px";
+            p.style.cursor="default";
+
+            board.appendChild(p);
+
+            // click to return
+            p.addEventListener("click", ()=>{
+              p.dataset.placed="0";
+              p.removeAttribute("data-slot");
+              p.style.position="";
+              p.style.left="";
+              p.style.top="";
+              p.style.width="";
+              p.style.height="";
+              p.style.cursor="grab";
+              tray.appendChild(p);
+              checkSolved();
+            }, { once:true });
+          }
+        }
+
+        clone.remove();
+        checkSolved();
+      };
+
+      window.addEventListener("pointermove", move);
+      window.addEventListener("pointerup", up);
+    });
+  });
+}
+
+function checkSolved(){
+  const placed=[...board.querySelectorAll(".piece")];
+  if(placed.length !== ROWS*COLS){
+    successBox.style.display="none";
+    hint.textContent = `Placed ${placed.length}/${ROWS*COLS}.`;
+    return;
+  }
+  let ok=true;
+  for(const p of placed){
+    const correct=parseInt(p.dataset.correct,10);
+    const slot=parseInt(p.dataset.slot,10);
+    if(correct!==slot){ ok=false; break; }
+  }
+  if(ok){
+    hint.textContent="Perfect ✅";
+    successBox.style.display="block";
+  } else {
+    hint.textContent="قربت… في قطع متبدلة 🙂";
+    successBox.style.display="none";
+  }
+}
+
+function init(){
+  clearAll();
+  makeSlots();
+  createPieces();
+}
+
+document.getElementById("shuffleBtn").addEventListener("click", ()=>{
+  const unplaced=[...tray.querySelectorAll(".piece")];
+  const s=shuffle(unplaced);
+  tray.innerHTML="";
+  s.forEach(x=>tray.appendChild(x));
+});
+
+document.getElementById("restartBtn").addEventListener("click", init);
+
+document.getElementById("guideBtn").addEventListener("click", ()=>{
+  showGuide=!showGuide;
+  [...board.querySelectorAll(".ghostSlot")].forEach(s=>s.style.opacity=showGuide?"1":"0");
+});
+
+window.addEventListener("resize", ()=>{
+  clearTimeout(window.__rz);
+  window.__rz=setTimeout(init, 250);
+});
+
+init();
+</script>
+</body>
+</html>
