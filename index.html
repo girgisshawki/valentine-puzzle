@@ -14,10 +14,13 @@
       --shadow:0 25px 70px rgba(0,0,0,0.5);
       --accent:#ff4d7d;
 
-      /* tray piece size will be set by JS */
+      /* tray piece size set by JS */
       --trayW: 66px;
       --trayH: 110px;
     }
+
+    /* منع pull-to-refresh/overscroll */
+    html, body{ overscroll-behavior: none; }
 
     body{
       margin:0;
@@ -31,7 +34,11 @@
         radial-gradient(900px 600px at 20% 10%, rgba(255,77,125,0.25), transparent 60%),
         radial-gradient(900px 700px at 80% 90%, rgba(255,179,199,0.18), transparent 60%),
         linear-gradient(180deg,#0b0f19,#1a1030);
+      touch-action: pan-x pan-y; /* يسمح بالسكرول العادي خارج اللعبة */
     }
+
+    /* أثناء اللعب: امنع المتصفح يفسر السحب كسكرول/ريفريش */
+    #board, #tray, .piece{ touch-action: none; }
 
     #confetti{
       position:fixed;
@@ -141,7 +148,6 @@
       overflow:hidden;
       background:rgba(255,255,255,0.06);
       border:1px solid rgba(255,255,255,0.15);
-      touch-action:none;
     }
 
     /* Tray */
@@ -164,7 +170,6 @@
       background-position: var(--bgPos);
       cursor:grab;
       user-select:none;
-      touch-action:none;
       box-shadow:0 10px 25px rgba(0,0,0,0.20);
       transition:transform .12s ease, box-shadow .2s ease, border-color .2s ease;
     }
@@ -278,7 +283,7 @@
       <div class="panel">
         <div class="title"><span>Pieces tray</span></div>
         <div id="tray"></div>
-        <div class="tiny">القطع برا دلوقتي بقت بنفس نسبة القطع الحقيقية. على الموبايل: اضغط مطوّل واسحب.</div>
+        <div class="tiny">تم منع الـ refresh أثناء السحب. على الموبايل: اضغط مطوّل واسحب.</div>
       </div>
     </div>
   </div>
@@ -327,6 +332,12 @@ but this one is yours.
   let showGuide = true;
   let solvedOnce = false;
 
+  // منع التمرير/الريفريش أثناء السحب
+  let isDragging = false;
+  window.addEventListener("touchmove", (e) => {
+    if (isDragging) e.preventDefault();
+  }, { passive: false });
+
   function shuffle(arr){
     const a = [...arr];
     for (let i=a.length-1; i>0; i--){
@@ -365,13 +376,12 @@ but this one is yours.
     }
   }
 
-  // يجعل قطع الـ tray مستطيلات بنفس نسبة السلوط الحقيقية
   function updateTrayPieceSize(){
     const boardRect = board.getBoundingClientRect();
     const slotW = boardRect.width / COLS;
     const slotH = boardRect.height / ROWS;
 
-    const scale = 0.58; // حجم مناسب للتراي
+    const scale = 0.58;
     const trayW = Math.max(48, Math.floor(slotW * scale));
     const trayH = Math.max(70, Math.floor(slotH * scale));
 
@@ -450,14 +460,19 @@ but this one is yours.
     s.forEach(x => tray.appendChild(x));
   }
 
-  /* ===== Drag behavior (drag from tray and from board) ===== */
   function attachDrag(){
     pieces.forEach(p => {
       if (p.dataset.dragBound === "1") return;
       p.dataset.dragBound = "1";
 
       p.addEventListener("pointerdown", (e) => {
+        e.preventDefault();
+
         p.setPointerCapture(e.pointerId);
+
+        // قفل السكرول وقت السحب فقط
+        isDragging = true;
+        document.body.style.overflow = "hidden";
 
         const isPlaced = (p.dataset.placed === "1");
         const fromSlot = isPlaced ? parseInt(p.dataset.slot, 10) : null;
@@ -478,6 +493,11 @@ but this one is yours.
         clone.style.opacity = "0.95";
         clone.style.cursor = "grabbing";
         document.body.appendChild(clone);
+
+        const endDrag = () => {
+          isDragging = false;
+          document.body.style.overflow = "";
+        };
 
         const move = (ev) => {
           const dx = ev.clientX - startX;
@@ -537,6 +557,7 @@ but this one is yours.
           if (!onBoard){
             clone.remove();
             dropIntoTray();
+            endDrag();
             return;
           }
 
@@ -586,6 +607,7 @@ but this one is yours.
           clone.remove();
           modal.classList.remove("open");
           checkSolved();
+          endDrag();
         };
 
         window.addEventListener("pointermove", move);
@@ -666,7 +688,7 @@ but this one is yours.
   function init(){
     clearAll();
     makeSlots();
-    updateTrayPieceSize();  // <-- هنا التعديل الأساسي لقطع التراي
+    updateTrayPieceSize();
     createPieces();
   }
 
