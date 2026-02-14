@@ -19,14 +19,18 @@
       --trayH: 110px;
     }
 
-    /* منع pull-to-refresh/overscroll */
-    html, body{ overscroll-behavior: none; }
-
+    /* ====== LOCK SCROLL / PULL-TO-REFRESH (strong) ====== */
+    html, body{
+      height: 100%;
+      overflow: hidden;              /* no page scrolling */
+      overscroll-behavior: none;      /* no pull-to-refresh */
+    }
     body{
+      position: fixed;               /* keep viewport fixed */
+      width: 100%;
       margin:0;
       font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial;
       color:var(--text);
-      min-height:100vh;
       display:flex;
       align-items:center;
       justify-content:center;
@@ -34,10 +38,9 @@
         radial-gradient(900px 600px at 20% 10%, rgba(255,77,125,0.25), transparent 60%),
         radial-gradient(900px 700px at 80% 90%, rgba(255,179,199,0.18), transparent 60%),
         linear-gradient(180deg,#0b0f19,#1a1030);
-      touch-action: pan-x pan-y; /* يسمح بالسكرول العادي خارج اللعبة */
     }
 
-    /* أثناء اللعب: امنع المتصفح يفسر السحب كسكرول/ريفريش */
+    /* While playing, don't let browser interpret gestures as scrolling */
     #board, #tray, .piece{ touch-action: none; }
 
     #confetti{
@@ -49,12 +52,15 @@
 
     .card{
       width:min(1040px,95vw);
+      max-height: 94vh;              /* keep inside viewport */
+      overflow: hidden;              /* avoid internal scroll bounce */
       background:var(--card);
       border:1px solid var(--border);
       border-radius:22px;
       padding:20px;
       box-shadow:var(--shadow);
       backdrop-filter:blur(12px);
+      box-sizing: border-box;
     }
 
     .top{
@@ -124,6 +130,7 @@
       border:1px solid rgba(255,255,255,0.12);
       border-radius:18px;
       padding:12px;
+      box-sizing: border-box;
     }
 
     .title{
@@ -283,7 +290,7 @@
       <div class="panel">
         <div class="title"><span>Pieces tray</span></div>
         <div id="tray"></div>
-        <div class="tiny">تم منع الـ refresh أثناء السحب. على الموبايل: اضغط مطوّل واسحب.</div>
+        <div class="tiny">تم إيقاف الـ pull-to-refresh نهائيًا. (الصفحة بدون scroll)</div>
       </div>
     </div>
   </div>
@@ -332,11 +339,15 @@ but this one is yours.
   let showGuide = true;
   let solvedOnce = false;
 
-  // منع التمرير/الريفريش أثناء السحب
-  let isDragging = false;
-  window.addEventListener("touchmove", (e) => {
-    if (isDragging) e.preventDefault();
+  // ===== Ultra-strong prevent refresh on mobile =====
+  // Prevent any touchmove from scrolling/refreshing the page.
+  document.addEventListener("touchmove", (e) => {
+    e.preventDefault();
   }, { passive: false });
+
+  // Prevent touchstart default on play areas (helps some browsers)
+  board.addEventListener("touchstart", (e) => e.preventDefault(), { passive: false });
+  tray.addEventListener("touchstart", (e) => e.preventDefault(), { passive: false });
 
   function shuffle(arr){
     const a = [...arr];
@@ -467,12 +478,7 @@ but this one is yours.
 
       p.addEventListener("pointerdown", (e) => {
         e.preventDefault();
-
         p.setPointerCapture(e.pointerId);
-
-        // قفل السكرول وقت السحب فقط
-        isDragging = true;
-        document.body.style.overflow = "hidden";
 
         const isPlaced = (p.dataset.placed === "1");
         const fromSlot = isPlaced ? parseInt(p.dataset.slot, 10) : null;
@@ -493,11 +499,6 @@ but this one is yours.
         clone.style.opacity = "0.95";
         clone.style.cursor = "grabbing";
         document.body.appendChild(clone);
-
-        const endDrag = () => {
-          isDragging = false;
-          document.body.style.overflow = "";
-        };
 
         const move = (ev) => {
           const dx = ev.clientX - startX;
@@ -557,7 +558,6 @@ but this one is yours.
           if (!onBoard){
             clone.remove();
             dropIntoTray();
-            endDrag();
             return;
           }
 
@@ -607,7 +607,6 @@ but this one is yours.
           clone.remove();
           modal.classList.remove("open");
           checkSolved();
-          endDrag();
         };
 
         window.addEventListener("pointermove", move);
