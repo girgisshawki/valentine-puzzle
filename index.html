@@ -132,7 +132,7 @@
     #board{
       position:relative;
       width:100%;
-      aspect-ratio: 9 / 16; /* الخيار الأول: نفس vibe الصورة الطولية */
+      aspect-ratio: 9 / 16;
       border-radius:16px;
       overflow:hidden;
       background:rgba(255,255,255,0.06);
@@ -290,7 +290,7 @@
 
 <script>
   /* ====== Settings ====== */
-  const IMAGE_SRC = "puzzle.jpg";   // لازم تكون موجودة في نفس الريبو
+  const IMAGE_SRC = "puzzle.jpg";
   const ROWS = 4;
   const COLS = 4;
 
@@ -301,7 +301,6 @@ Some sunsets are beautiful…
 but this one is yours.
 
 — Girgis`;
-
   /* ====================== */
 
   const board = document.getElementById("board");
@@ -372,7 +371,6 @@ but this one is yours.
         d.style.setProperty("--img", IMG);
         d.style.setProperty("--bgSize", `${COLS*100}% ${ROWS*100}%`);
 
-        // background position: show the correct slice
         const posX = (c/(COLS-1||1))*100;
         const posY = (r/(ROWS-1||1))*100;
         d.style.setProperty("--bgPos", `${posX}% ${posY}%`);
@@ -383,103 +381,9 @@ but this one is yours.
 
     pieces = shuffle(pieces);
     pieces.forEach(p => tray.appendChild(p));
-    attachDrag();
+    attachDrag(); // مهم: بتخلي السحب شغال للتراي + البورد
     updateProgress();
     hint.textContent = "ابدأ… ورتّبها واحدة واحدة 🙂";
-  }
-
-  function attachDrag(){
-    pieces.forEach(p => {
-      p.addEventListener("pointerdown", (e) => {
-        if (p.dataset.placed === "1") return;
-
-        p.setPointerCapture(e.pointerId);
-
-        const startX = e.clientX, startY = e.clientY;
-        const origRect = p.getBoundingClientRect();
-
-        // clone for smooth dragging
-        const clone = p.cloneNode(true);
-        clone.style.position = "fixed";
-        clone.style.left = origRect.left + "px";
-        clone.style.top = origRect.top + "px";
-        clone.style.width = origRect.width + "px";
-        clone.style.height = origRect.height + "px";
-        clone.style.margin = "0";
-        clone.style.zIndex = "9997";
-        clone.style.opacity = "0.95";
-        clone.style.cursor = "grabbing";
-        document.body.appendChild(clone);
-
-        const move = (ev) => {
-          const dx = ev.clientX - startX;
-          const dy = ev.clientY - startY;
-          clone.style.transform = `translate(${dx}px, ${dy}px)`;
-        };
-
-        const up = (ev) => {
-          p.releasePointerCapture(e.pointerId);
-          window.removeEventListener("pointermove", move);
-          window.removeEventListener("pointerup", up);
-
-          const boardRect = board.getBoundingClientRect();
-          const dropX = ev.clientX, dropY = ev.clientY;
-
-          const onBoard =
-            dropX >= boardRect.left && dropX <= boardRect.right &&
-            dropY >= boardRect.top  && dropY <= boardRect.bottom;
-
-          if (onBoard){
-            const localX = dropX - boardRect.left;
-            const localY = dropY - boardRect.top;
-
-            const slotW = boardRect.width / COLS;
-            const slotH = boardRect.height / ROWS;
-
-            const c = Math.max(0, Math.min(COLS-1, Math.floor(localX / slotW)));
-            const r = Math.max(0, Math.min(ROWS-1, Math.floor(localY / slotH)));
-            const targetIdx = r*COLS + c;
-
-            const occupied = !!board.querySelector(`.piece[data-slot='${targetIdx}']`);
-            if (!occupied){
-              p.dataset.slot = String(targetIdx);
-              p.dataset.placed = "1";
-
-              p.style.position = "absolute";
-              p.style.left = (c*slotW) + "px";
-              p.style.top  = (r*slotH) + "px";
-              p.style.width  = slotW + "px";
-              p.style.height = slotH + "px";
-              p.style.borderRadius = "14px";
-              p.style.cursor = "default";
-
-              board.appendChild(p);
-
-              // click to return to tray
-              p.addEventListener("click", () => {
-                p.dataset.placed = "0";
-                p.removeAttribute("data-slot");
-                p.style.position = "";
-                p.style.left = "";
-                p.style.top = "";
-                p.style.width = "";
-                p.style.height = "";
-                p.style.cursor = "grab";
-                tray.appendChild(p);
-                modal.classList.remove("open");
-                checkSolved();
-              }, { once:true });
-            }
-          }
-
-          clone.remove();
-          checkSolved();
-        };
-
-        window.addEventListener("pointermove", move);
-        window.addEventListener("pointerup", up);
-      });
-    });
   }
 
   function placedCount(){
@@ -527,7 +431,159 @@ but this one is yours.
     s.forEach(x => tray.appendChild(x));
   }
 
-  /* Confetti (simple) */
+  /* ===== Drag behavior (no double click needed) ===== */
+  function attachDrag(){
+    pieces.forEach(p => {
+      // Avoid attaching twice if init runs again
+      if (p.dataset.dragBound === "1") return;
+      p.dataset.dragBound = "1";
+
+      p.addEventListener("pointerdown", (e) => {
+        p.setPointerCapture(e.pointerId);
+
+        const isPlaced = (p.dataset.placed === "1");
+        const fromSlot = isPlaced ? parseInt(p.dataset.slot, 10) : null;
+
+        const startX = e.clientX, startY = e.clientY;
+        const origRect = p.getBoundingClientRect();
+
+        // hide original during drag
+        p.style.visibility = "hidden";
+
+        // clone for smooth dragging
+        const clone = p.cloneNode(true);
+        clone.style.position = "fixed";
+        clone.style.left = origRect.left + "px";
+        clone.style.top = origRect.top + "px";
+        clone.style.width = origRect.width + "px";
+        clone.style.height = origRect.height + "px";
+        clone.style.margin = "0";
+        clone.style.zIndex = "9997";
+        clone.style.opacity = "0.95";
+        clone.style.cursor = "grabbing";
+        document.body.appendChild(clone);
+
+        const move = (ev) => {
+          const dx = ev.clientX - startX;
+          const dy = ev.clientY - startY;
+          clone.style.transform = `translate(${dx}px, ${dy}px)`;
+        };
+
+        const dropIntoTray = () => {
+          p.dataset.placed = "0";
+          p.removeAttribute("data-slot");
+          p.style.position = "";
+          p.style.left = "";
+          p.style.top = "";
+          p.style.width = "";
+          p.style.height = "";
+          p.style.cursor = "grab";
+          p.style.visibility = "";
+          tray.appendChild(p);
+          modal.classList.remove("open");
+          checkSolved();
+        };
+
+        const snapPieceToSlot = (pieceEl, targetIdx) => {
+          const boardRect = board.getBoundingClientRect();
+          const slotW = boardRect.width / COLS;
+          const slotH = boardRect.height / ROWS;
+          const r = Math.floor(targetIdx / COLS);
+          const c = targetIdx % COLS;
+
+          pieceEl.dataset.slot = String(targetIdx);
+          pieceEl.dataset.placed = "1";
+
+          pieceEl.style.position = "absolute";
+          pieceEl.style.left = (c*slotW) + "px";
+          pieceEl.style.top  = (r*slotH) + "px";
+          pieceEl.style.width  = slotW + "px";
+          pieceEl.style.height = slotH + "px";
+          pieceEl.style.borderRadius = "14px";
+          pieceEl.style.cursor = "grab";
+          pieceEl.style.visibility = "";
+
+          board.appendChild(pieceEl);
+        };
+
+        const up = (ev) => {
+          p.releasePointerCapture(e.pointerId);
+          window.removeEventListener("pointermove", move);
+          window.removeEventListener("pointerup", up);
+
+          const boardRect = board.getBoundingClientRect();
+          const dropX = ev.clientX, dropY = ev.clientY;
+
+          const onBoard =
+            dropX >= boardRect.left && dropX <= boardRect.right &&
+            dropY >= boardRect.top  && dropY <= boardRect.bottom;
+
+          if (!onBoard){
+            clone.remove();
+            dropIntoTray();
+            return;
+          }
+
+          const localX = dropX - boardRect.left;
+          const localY = dropY - boardRect.top;
+
+          const slotW = boardRect.width / COLS;
+          const slotH = boardRect.height / ROWS;
+
+          const c = Math.max(0, Math.min(COLS-1, Math.floor(localX / slotW)));
+          const r = Math.max(0, Math.min(ROWS-1, Math.floor(localY / slotH)));
+          const targetIdx = r*COLS + c;
+
+          const occupant = board.querySelector(`.piece[data-slot='${targetIdx}']`);
+
+          // If target slot occupied by a different piece
+          if (occupant && occupant !== p){
+            if (isPlaced && fromSlot !== null && fromSlot !== targetIdx){
+              // swap occupant back to the original slot if possible
+              const backOcc = board.querySelector(`.piece[data-slot='${fromSlot}']`);
+              if (!backOcc || backOcc === p){
+                snapPieceToSlot(occupant, fromSlot);
+              } else {
+                // if original slot not free, send occupant to tray
+                occupant.dataset.placed = "0";
+                occupant.removeAttribute("data-slot");
+                occupant.style.position = "";
+                occupant.style.left = "";
+                occupant.style.top = "";
+                occupant.style.width = "";
+                occupant.style.height = "";
+                occupant.style.cursor = "grab";
+                tray.appendChild(occupant);
+              }
+            } else {
+              // coming from tray: push occupant to tray
+              occupant.dataset.placed = "0";
+              occupant.removeAttribute("data-slot");
+              occupant.style.position = "";
+              occupant.style.left = "";
+              occupant.style.top = "";
+              occupant.style.width = "";
+              occupant.style.height = "";
+              occupant.style.cursor = "grab";
+              tray.appendChild(occupant);
+            }
+          }
+
+          // snap dragged piece
+          snapPieceToSlot(p, targetIdx);
+
+          clone.remove();
+          modal.classList.remove("open");
+          checkSolved();
+        };
+
+        window.addEventListener("pointermove", move);
+        window.addEventListener("pointerup", up);
+      });
+    });
+  }
+
+  /* Confetti */
   const confettiCanvas = document.getElementById("confetti");
   const ctx = confettiCanvas.getContext("2d");
   let confetti = [];
@@ -572,7 +628,6 @@ but this one is yours.
       ctx.translate(p.x, p.y);
       ctx.rotate(p.a);
 
-      // ألوان خفيفة وردي/بنفسجي (hsla)
       const hue = 320 + Math.floor(Math.random()*50);
       ctx.fillStyle = `hsla(${hue}, 90%, 70%, 0.9)`;
       ctx.fillRect(-p.s, -p.s, p.s*2, p.s*2);
@@ -609,7 +664,7 @@ but this one is yours.
     window.__rz = setTimeout(init, 250);
   });
 
-  // Ensure image is loadable (optional guard)
+  // Ensure image is loadable
   const preload = new Image();
   preload.onload = () => init();
   preload.onerror = () => {
