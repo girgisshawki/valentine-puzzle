@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1"/>
   <title>Valentine Puzzle</title>
 
-  <!-- Nice fonts -->
+  <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;700&family=Nunito:wght@600;800;900&display=swap" rel="stylesheet">
@@ -488,7 +488,6 @@
       font-family: Nunito, system-ui, -apple-system, Segoe UI, Roboto, Arial;
     }
 
-    /* Message area + typewriter */
     .msgWrap{
       flex:1;
       overflow:auto;
@@ -499,20 +498,25 @@
       padding:16px 14px;
     }
 
+    /* ✅ FIXED MESSAGE LOOK (smooth + readable on mobile) */
     .msg{
       white-space:pre-wrap;
       color:rgba(90,0,64,0.92);
-      line-height:1.95;
-      font-weight:600;
-      font-family: "Playfair Display", Georgia, "Times New Roman", serif;
+      line-height:1.85;
+      font-weight:500;
 
-      font-size: clamp(16px, 2.3vw, 22px);
-      max-width: 62ch;
-      margin: 0 auto;
+      /* softer */
+      font-family: "Nunito", system-ui, -apple-system, Segoe UI, Roboto, Arial;
+
+      /* crucial: smaller + stable */
+      font-size: clamp(15px, 1.25vw + 10px, 18px);
+
+      max-width:64ch;
+      margin:0 auto;
       position:relative;
+      letter-spacing:0.1px;
     }
 
-    /* blinking cursor */
     .cursor{
       display:inline-block;
       width:10px;
@@ -523,7 +527,6 @@
     }
     @keyframes blink { 50%{ opacity:0; } }
 
-    /* soft sparkle overlay */
     .sparkle{
       position:absolute;
       inset:-20px;
@@ -542,13 +545,13 @@
       50%{ transform:translateY(-8px); opacity:0.75; }
     }
 
-    /* signature */
+    /* ✅ signature looks consistent */
     .sig{
-      max-width:62ch;
-      margin: 12px auto 0;
-      font-family: "Playfair Display", Georgia, "Times New Roman", serif;
-      font-weight:700;
-      font-size: clamp(15px, 2vw, 18px);
+      max-width:64ch;
+      margin: 10px auto 0;
+      font-family: "Nunito", system-ui, -apple-system, Segoe UI, Roboto, Arial;
+      font-weight:900;
+      font-size:14px;
       color:rgba(179,0,94,0.92);
       display:flex;
       justify-content:flex-end;
@@ -614,7 +617,6 @@
     </div>
   </div>
 
-  <!-- SOLVED MODAL -->
   <div class="solvedModal" id="solvedModal">
     <div class="solvedCard">
       <div class="env" id="env">
@@ -650,7 +652,6 @@
   const IMAGE_SRC = "puzzle.jpg";
   const ROWS = 4, COLS = 4;
 
-  // ✅ Your message
   const finalMessage =
 `Some sunsets are beautiful, They arrive gently, spill gold across the sky, and disappear without asking anything of us.
 But you…
@@ -682,12 +683,10 @@ Some sunsets are beautiful but you're my perfect light of all sunsets ♥️♥�
   const letterMsg = document.getElementById("letterMsg");
   const signature = document.getElementById("signature");
 
-  // keep modal safe (tap outside does nothing)
   solvedModal.addEventListener("click", (e) => {
     if (e.target === solvedModal) e.preventDefault();
   });
 
-  // prevent scroll only while dragging
   let isDragging = false;
   document.addEventListener("touchmove", (e) => { if (isDragging) e.preventDefault(); }, { passive:false });
 
@@ -819,14 +818,14 @@ Some sunsets are beautiful but you're my perfect light of all sunsets ♥️♥�
     floatHearts.appendChild(h);
   }
 
-  // ✅ Typewriter
+  // typewriter
   let typerTimer = null;
   function typeMessage(text){
     if (typerTimer) clearInterval(typerTimer);
     letterMsg.innerHTML = "";
     signature.style.display = "none";
 
-    const speed = 16; // ms per char (smooth)
+    const speed = 16;
     let i = 0;
 
     const cursor = document.createElement("span");
@@ -835,12 +834,9 @@ Some sunsets are beautiful but you're my perfect light of all sunsets ♥️♥�
     letterMsg.appendChild(cursor);
 
     typerTimer = setInterval(() => {
-      // insert char before cursor
       if (i < text.length){
         cursor.insertAdjacentText("beforebegin", text[i]);
         i++;
-
-        // auto-scroll inside msgWrap while typing
         const wrap = letterMsg.closest(".msgWrap");
         wrap.scrollTop = wrap.scrollHeight;
       } else {
@@ -1176,7 +1172,6 @@ Some sunsets are beautiful but you're my perfect light of all sunsets ♥️♥�
     });
   }
 
-  // open envelope -> letter + typewriter
   env.addEventListener("click", () => {
     flap.style.transform = "translateX(-50%) rotateX(180deg)";
     setTimeout(() => {
@@ -1193,7 +1188,6 @@ Some sunsets are beautiful but you're my perfect light of all sunsets ♥️♥�
     }, 260);
   });
 
-  // close letter -> back to envelope
   closeLetter.addEventListener("click", () => {
     if (typerTimer) { clearInterval(typerTimer); typerTimer = null; }
     letterMsg.textContent = "";
@@ -1218,7 +1212,6 @@ Some sunsets are beautiful but you're my perfect light of all sunsets ♥️♥�
     createPieces();
   }
 
-  // preload image + cache bust
   const preload = new Image();
   preload.onload = () => { imgUrl = IMAGE_SRC + "?v=" + Date.now(); initGame(); };
   preload.onerror = () => { imgUrl = ""; hint.textContent = "Image not loading ❤ (check puzzle.jpg name/path)"; initGame(); };
