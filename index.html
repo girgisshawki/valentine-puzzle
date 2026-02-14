@@ -9,7 +9,6 @@
     :root{
       --pink1:#ff4d8d;
       --pink2:#ff7eb3;
-      --pink3:#ffd6e8;
       --soft:#fff5fa;
 
       --text:#5a0040;
@@ -23,9 +22,7 @@
       --trayH:110px;
     }
 
-    html, body{
-      overscroll-behavior-y: none;
-    }
+    html, body{ overscroll-behavior-y: none; }
 
     body{
       margin:0;
@@ -46,14 +43,14 @@
       position:relative;
     }
 
-    /* soft hearts pattern */
+    /* soft hearts wallpaper */
     body::before{
       content:"❤ ❤ ❤ ❤ ❤ ❤ ❤ ❤ ❤ ❤ ❤ ❤ ❤ ❤ ❤";
       position:fixed;
       inset:-40px;
-      font-size:84px;
+      font-size:86px;
       line-height:1.9;
-      letter-spacing:20px;
+      letter-spacing:18px;
       color:rgba(255,255,255,0.08);
       display:flex;
       flex-wrap:wrap;
@@ -64,7 +61,7 @@
       transform:rotate(-8deg);
     }
 
-    /* floating hearts */
+    /* floating hearts (stronger animation) */
     .float-hearts{
       position:fixed;
       inset:0;
@@ -74,15 +71,30 @@
     }
     .heart{
       position:absolute;
-      bottom:-40px;
+      bottom:-60px;
       font-size:22px;
-      opacity:0.25;
-      animation: rise linear infinite;
-      filter: blur(0.2px);
+      opacity:0.20;
+      color:rgba(255,255,255,0.95);
+      text-shadow:0 10px 30px rgba(255,105,180,0.25);
+      animation:
+        rise var(--dur) linear var(--delay) infinite,
+        sway var(--swayDur) ease-in-out var(--delay) infinite,
+        twinkle var(--twDur) ease-in-out var(--delay) infinite;
+      will-change: transform, opacity, filter;
+      filter: blur(0.15px);
     }
+
     @keyframes rise{
-      from{ transform: translateY(0) translateX(0) scale(1); }
-      to{ transform: translateY(-120vh) translateX(-30px) scale(1.25); }
+      from{ transform: translateY(0) translateX(0) rotate(0deg) scale(var(--scale)); }
+      to  { transform: translateY(-125vh) translateX(var(--drift)) rotate(var(--rot)) scale(calc(var(--scale) * 1.25)); }
+    }
+    @keyframes sway{
+      0%,100%{ margin-left:0px; }
+      50%{ margin-left:var(--sway); }
+    }
+    @keyframes twinkle{
+      0%,100%{ opacity:0.10; filter:blur(0.2px); }
+      50%{ opacity:0.35; filter:blur(0px); }
     }
 
     /* scroll allowed over board/tray, pieces handle drag */
@@ -140,11 +152,7 @@
       color:#b3005e;
       letter-spacing:0.2px;
     }
-    p{
-      margin:0;
-      color:var(--muted);
-      line-height:1.6;
-    }
+    p{ margin:0; color:var(--muted); line-height:1.6; }
 
     .row{
       display:flex;
@@ -239,6 +247,15 @@
     }
     .piece:active{ cursor:grabbing; transform:scale(0.99); }
 
+    /* ✅ locked piece look */
+    .piece.locked{
+      cursor:default;
+      box-shadow:0 10px 22px rgba(0,0,0,0.08);
+      border-color:rgba(255,105,180,0.55);
+      filter:saturate(1.05);
+    }
+    .piece.locked:hover{ transform:none; }
+
     .ghostSlot{
       position:absolute;
       border:1px dashed rgba(255,77,141,0.25);
@@ -250,7 +267,77 @@
       margin-top:8px;
       font-size:13px;
       color:rgba(90,0,64,0.78);
-      font-weight:700;
+      font-weight:800;
+    }
+
+    /* Envelope appears when fully solved */
+    .envelopeWrap{
+      position:absolute;
+      inset:0;
+      display:none;
+      align-items:center;
+      justify-content:center;
+      z-index:50;
+      background:linear-gradient(180deg, rgba(255,255,255,0.10), rgba(255,255,255,0.25));
+      backdrop-filter: blur(2px);
+    }
+    .envelopeWrap.show{ display:flex; }
+
+    .envelopeBtn{
+      border:none;
+      cursor:pointer;
+      background:rgba(255,255,255,0.80);
+      border:2px solid rgba(255,105,180,0.35);
+      border-radius:22px;
+      padding:16px 18px;
+      box-shadow:0 18px 40px rgba(255,105,180,0.30);
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      gap:10px;
+      transform:translateY(0);
+      transition:transform .15s ease, box-shadow .2s ease;
+    }
+    .envelopeBtn:hover{
+      transform:translateY(-3px);
+      box-shadow:0 26px 55px rgba(255,105,180,0.38);
+    }
+    .envelopeIcon{
+      width:88px;height:62px;
+      border-radius:16px;
+      position:relative;
+      background:linear-gradient(135deg,#fff0f6,#ffe6f2);
+      border:2px solid rgba(255,105,180,0.35);
+      overflow:hidden;
+    }
+    .envelopeIcon::before{
+      content:"";
+      position:absolute;
+      inset:0;
+      background:
+        linear-gradient(135deg, transparent 48%, rgba(255,105,180,0.22) 49%, rgba(255,105,180,0.22) 51%, transparent 52%),
+        linear-gradient(225deg, transparent 48%, rgba(255,105,180,0.22) 49%, rgba(255,105,180,0.22) 51%, transparent 52%);
+      opacity:0.9;
+    }
+    .envelopeIcon::after{
+      content:"❤";
+      position:absolute;
+      left:50%; top:50%;
+      transform:translate(-50%,-45%);
+      color:rgba(179,0,94,0.85);
+      font-size:20px;
+      text-shadow:0 10px 20px rgba(255,105,180,0.25);
+    }
+    .envelopeText{
+      font-weight:900;
+      color:#b3005e;
+      letter-spacing:0.2px;
+    }
+    .envelopeSub{
+      font-size:12px;
+      color:rgba(90,0,64,0.65);
+      font-weight:800;
+      margin-top:-6px;
     }
 
     .modal{
@@ -304,7 +391,7 @@
       white-space:pre-wrap;
       color:rgba(90,0,64,0.92);
       line-height:1.7;
-      font-weight:650;
+      font-weight:750;
     }
   </style>
 </head>
@@ -316,7 +403,7 @@
   <div class="card">
     <div class="top">
       <div class="brand">
-        <div class="badge">💘</div>
+        <div class="badge">❤</div>
         <div>
           <h1>Solve the puzzle 👇🏻 ♥️</h1>
           <p></p>
@@ -336,7 +423,17 @@
           <span>Board</span>
           <span class="progress" id="progress">0/16</span>
         </div>
-        <div id="board"></div>
+
+        <div id="board">
+          <div class="envelopeWrap" id="envelopeWrap">
+            <button class="envelopeBtn" id="openLetterBtn" type="button">
+              <div class="envelopeIcon"></div>
+              <div class="envelopeText">Tap to open ❤</div>
+              <div class="envelopeSub">A little letter…</div>
+            </button>
+          </div>
+        </div>
+
         <div class="hint" id="hint"></div>
       </div>
 
@@ -350,7 +447,7 @@
   <div class="modal" id="modal">
     <div class="modalCard">
       <div class="modalTop">
-        <h2>Unlocked 💌</h2>
+        <h2>❤</h2>
         <button class="close" id="closeModal">Close</button>
       </div>
       <div class="msg" id="modalMsg"></div>
@@ -363,17 +460,18 @@
   const COLS = 4;
 
   const finalMessage =
-`Happy Valentine’s Day, Emily 🌹
+`Some sunsets are beautiful...
+But you're my favourite sunset ♥️ ✨
 
-Some sunsets are beautiful…
-but this one is yours.
-
-— Girgis`;
+Happy Valentine's Day my lovely Emy ♥️ ♥️`;
 
   const board = document.getElementById("board");
   const tray = document.getElementById("tray");
   const hint = document.getElementById("hint");
   const progress = document.getElementById("progress");
+
+  const envelopeWrap = document.getElementById("envelopeWrap");
+  const openLetterBtn = document.getElementById("openLetterBtn");
 
   const modal = document.getElementById("modal");
   const modalMsg = document.getElementById("modalMsg");
@@ -387,7 +485,7 @@ but this one is yours.
 
   let pieces = [];
   let showGuide = true;
-  let solvedOnce = false;
+  let confettiOnce = false;
 
   // prevent scroll/refresh only while dragging
   let isDragging = false;
@@ -405,11 +503,14 @@ but this one is yours.
   }
 
   function clearAll(){
-    board.innerHTML = "";
+    // keep envelopeWrap element (already inside board)
+    [...board.querySelectorAll(".ghostSlot")].forEach(x => x.remove());
+    [...board.querySelectorAll(".piece")].forEach(x => x.remove());
     tray.innerHTML = "";
     pieces = [];
+    envelopeWrap.classList.remove("show");
     modal.classList.remove("open");
-    solvedOnce = false;
+    confettiOnce = false;
   }
 
   function makeSlots(){
@@ -452,6 +553,7 @@ but this one is yours.
         d.className = "piece";
         d.dataset.correct = String(correctIdx);
         d.dataset.placed = "0";
+        d.dataset.locked = "0";
         d.style.setProperty("--img", IMG);
         d.style.setProperty("--bgSize", `${COLS*100}% ${ROWS*100}%`);
 
@@ -467,7 +569,7 @@ but this one is yours.
     pieces.forEach(p => tray.appendChild(p));
     attachDrag();
     updateProgress();
-    hint.textContent = "Start 🙂";
+    hint.textContent = "Start ❤";
   }
 
   function placedCount(){
@@ -479,12 +581,15 @@ but this one is yours.
     progress.textContent = `${placed}/${ROWS*COLS}`;
   }
 
+  function isLocked(el){ return el && el.dataset && el.dataset.locked === "1"; }
+
   function checkSolved(){
     updateProgress();
 
     const placed = [...board.querySelectorAll(".piece")];
     if (placed.length !== ROWS*COLS){
       hint.textContent = `Placed ${placed.length}/${ROWS*COLS}`;
+      envelopeWrap.classList.remove("show");
       return;
     }
 
@@ -496,22 +601,22 @@ but this one is yours.
     }
 
     if (ok){
-      hint.textContent = "Perfect ✅";
-      modal.classList.add("open");
-      if (!solvedOnce){
-        solvedOnce = true;
-        startConfetti();
-      }
+      hint.textContent = "Perfect ❤";
+      envelopeWrap.classList.add("show");
     } else {
-      hint.textContent = "Almost… 🙂";
+      hint.textContent = "Almost… ❤";
+      envelopeWrap.classList.remove("show");
       modal.classList.remove("open");
     }
   }
 
   function shuffleTray(){
-    const unplaced = [...tray.querySelectorAll(".piece")];
+    const unplaced = [...tray.querySelectorAll(".piece")].filter(p => p.dataset.locked !== "1");
     const s = shuffle(unplaced);
+    // keep locked (shouldn't exist in tray, but just in case)
+    const lockedInTray = [...tray.querySelectorAll(".piece")].filter(p => p.dataset.locked === "1");
     tray.innerHTML = "";
+    lockedInTray.forEach(x => tray.appendChild(x));
     s.forEach(x => tray.appendChild(x));
   }
 
@@ -521,13 +626,15 @@ but this one is yours.
       p.dataset.dragBound = "1";
 
       p.addEventListener("pointerdown", (e) => {
+        // ✅ locked piece: don't move
+        if (p.dataset.locked === "1") return;
+
         e.preventDefault();
         p.setPointerCapture(e.pointerId);
-
         isDragging = true;
 
-        const isPlaced = (p.dataset.placed === "1");
-        const fromSlot = isPlaced ? parseInt(p.dataset.slot, 10) : null;
+        const startedInBoard = (p.dataset.placed === "1");
+        const fromSlot = startedInBoard ? parseInt(p.dataset.slot, 10) : null;
 
         const startX = e.clientX, startY = e.clientY;
         const origRect = p.getBoundingClientRect();
@@ -535,6 +642,7 @@ but this one is yours.
         p.style.visibility = "hidden";
 
         const clone = p.cloneNode(true);
+        clone.classList.remove("locked");
         clone.style.position = "fixed";
         clone.style.left = origRect.left + "px";
         clone.style.top = origRect.top + "px";
@@ -554,21 +662,6 @@ but this one is yours.
           clone.style.transform = `translate(${dx}px, ${dy}px)`;
         };
 
-        const dropIntoTray = () => {
-          p.dataset.placed = "0";
-          p.removeAttribute("data-slot");
-          p.style.position = "";
-          p.style.left = "";
-          p.style.top = "";
-          p.style.width = "";
-          p.style.height = "";
-          p.style.cursor = "grab";
-          p.style.visibility = "";
-          tray.appendChild(p);
-          modal.classList.remove("open");
-          checkSolved();
-        };
-
         const snapPieceToSlot = (pieceEl, targetIdx) => {
           const boardRect = board.getBoundingClientRect();
           const slotW = boardRect.width / COLS;
@@ -585,10 +678,58 @@ but this one is yours.
           pieceEl.style.width  = slotW + "px";
           pieceEl.style.height = slotH + "px";
           pieceEl.style.borderRadius = "14px";
-          pieceEl.style.cursor = "grab";
+          pieceEl.style.cursor = (pieceEl.dataset.locked === "1") ? "default" : "grab";
           pieceEl.style.visibility = "";
 
           board.appendChild(pieceEl);
+        };
+
+        const returnToOrigin = () => {
+          // if it started in board, return to its old slot; else to tray
+          if (startedInBoard && fromSlot !== null){
+            snapPieceToSlot(p, fromSlot);
+          } else {
+            p.dataset.placed = "0";
+            p.removeAttribute("data-slot");
+            p.style.position = "";
+            p.style.left = "";
+            p.style.top = "";
+            p.style.width = "";
+            p.style.height = "";
+            p.style.cursor = "grab";
+            p.style.visibility = "";
+            tray.appendChild(p);
+          }
+          modal.classList.remove("open");
+          checkSolved();
+        };
+
+        const dropIntoTray = () => {
+          // if piece was locked (shouldn't happen), refuse
+          if (p.dataset.locked === "1"){ returnToOrigin(); return; }
+
+          p.dataset.placed = "0";
+          p.removeAttribute("data-slot");
+          p.style.position = "";
+          p.style.left = "";
+          p.style.top = "";
+          p.style.width = "";
+          p.style.height = "";
+          p.style.cursor = "grab";
+          p.style.visibility = "";
+          tray.appendChild(p);
+          modal.classList.remove("open");
+          checkSolved();
+        };
+
+        const lockIfCorrect = (pieceEl) => {
+          const correct = parseInt(pieceEl.dataset.correct, 10);
+          const slot = parseInt(pieceEl.dataset.slot, 10);
+          if (correct === slot){
+            pieceEl.dataset.locked = "1";
+            pieceEl.classList.add("locked");
+            pieceEl.style.cursor = "default";
+          }
         };
 
         const up = (ev) => {
@@ -622,12 +763,39 @@ but this one is yours.
 
           const occupant = board.querySelector(`.piece[data-slot='${targetIdx}']`);
 
+          // ✅ if target slot has locked piece -> cancel drop
+          if (isLocked(occupant)){
+            clone.remove();
+            p.style.visibility = "";
+            returnToOrigin();
+            endDrag();
+            return;
+          }
+
+          // if target occupied by movable piece, swap logic
           if (occupant && occupant !== p){
-            if (isPlaced && fromSlot !== null && fromSlot !== targetIdx){
+            // if dragged piece started on board: try move occupant back to fromSlot (only if fromSlot exists and not locked)
+            if (startedInBoard && fromSlot !== null && fromSlot !== targetIdx){
               const backOcc = board.querySelector(`.piece[data-slot='${fromSlot}']`);
-              if (!backOcc || backOcc === p){
+              if (!backOcc){
                 snapPieceToSlot(occupant, fromSlot);
               } else {
+                // if back slot occupied, send occupant to tray (only if it's not locked)
+                if (!isLocked(occupant)){
+                  occupant.dataset.placed = "0";
+                  occupant.removeAttribute("data-slot");
+                  occupant.style.position = "";
+                  occupant.style.left = "";
+                  occupant.style.top = "";
+                  occupant.style.width = "";
+                  occupant.style.height = "";
+                  occupant.style.cursor = "grab";
+                  tray.appendChild(occupant);
+                }
+              }
+            } else {
+              // dragged from tray: move occupant to tray
+              if (!isLocked(occupant)){
                 occupant.dataset.placed = "0";
                 occupant.removeAttribute("data-slot");
                 occupant.style.position = "";
@@ -638,20 +806,11 @@ but this one is yours.
                 occupant.style.cursor = "grab";
                 tray.appendChild(occupant);
               }
-            } else {
-              occupant.dataset.placed = "0";
-              occupant.removeAttribute("data-slot");
-              occupant.style.position = "";
-              occupant.style.left = "";
-              occupant.style.top = "";
-              occupant.style.width = "";
-              occupant.style.height = "";
-              occupant.style.cursor = "grab";
-              tray.appendChild(occupant);
             }
           }
 
           snapPieceToSlot(p, targetIdx);
+          lockIfCorrect(p);
 
           clone.remove();
           modal.classList.remove("open");
@@ -682,7 +841,7 @@ but this one is yours.
     if (confettiRunning) return;
     confettiRunning = true;
 
-    confetti = Array.from({length: 160}, () => ({
+    confetti = Array.from({length: 180}, () => ({
       x: Math.random()*confettiCanvas.width,
       y: -20 - Math.random()*confettiCanvas.height*0.3,
       s: 3 + Math.random()*4,
@@ -690,11 +849,11 @@ but this one is yours.
       vx: -1 + Math.random()*2,
       a: Math.random()*Math.PI*2,
       va: -0.12 + Math.random()*0.24,
-      life: 160 + Math.random()*120
+      life: 170 + Math.random()*130
     }));
 
     requestAnimationFrame(tickConfetti);
-    setTimeout(() => { confettiRunning = false; }, 2200);
+    setTimeout(() => { confettiRunning = false; }, 2400);
   }
 
   function tickConfetti(){
@@ -710,7 +869,7 @@ but this one is yours.
       ctx.translate(p.x, p.y);
       ctx.rotate(p.a);
 
-      const hue = 320 + Math.floor(Math.random()*50);
+      const hue = 320 + Math.floor(Math.random()*45);
       ctx.fillStyle = `hsla(${hue}, 90%, 70%, 0.9)`;
       ctx.fillRect(-p.s, -p.s, p.s*2, p.s*2);
 
@@ -726,18 +885,38 @@ but this one is yours.
     }
   }
 
-  // Floating hearts generator
+  // Floating hearts generator (hearts only)
   const floatHearts = document.getElementById("floatHearts");
-  const HEARTS = ["❤","💗","💖","💘","💕"];
-  for(let i=0;i<14;i++){
+  const COUNT = 34;
+  for(let i=0;i<COUNT;i++){
     const h = document.createElement("div");
     h.className = "heart";
-    h.textContent = HEARTS[Math.floor(Math.random()*HEARTS.length)];
-    h.style.left = Math.floor(Math.random()*100) + "vw";
-    h.style.animationDuration = (8 + Math.random()*8).toFixed(1) + "s";
-    h.style.animationDelay = (Math.random()*6).toFixed(1) + "s";
-    h.style.fontSize = (18 + Math.random()*26).toFixed(0) + "px";
-    h.style.opacity = (0.12 + Math.random()*0.18).toFixed(2);
+    h.textContent = "❤";
+
+    const left = Math.random()*100;
+    const dur = 7.5 + Math.random()*10.5;
+    const delay = Math.random()*6;
+    const scale = 0.55 + Math.random()*1.2;
+    const drift = (Math.random()*120 - 60).toFixed(0) + "px";
+    const rot = (Math.random()*260 - 130).toFixed(0) + "deg";
+    const sway = (Math.random()*26 - 13).toFixed(0) + "px";
+    const swayDur = (2.8 + Math.random()*3.2).toFixed(1) + "s";
+    const twDur = (2.0 + Math.random()*3.5).toFixed(1) + "s";
+    const size = (18 + Math.random()*34).toFixed(0) + "px";
+    const opacity = (0.10 + Math.random()*0.22).toFixed(2);
+
+    h.style.left = left + "vw";
+    h.style.setProperty("--dur", dur.toFixed(1) + "s");
+    h.style.setProperty("--delay", delay.toFixed(1) + "s");
+    h.style.setProperty("--scale", scale.toFixed(2));
+    h.style.setProperty("--drift", drift);
+    h.style.setProperty("--rot", rot);
+    h.style.setProperty("--sway", sway);
+    h.style.setProperty("--swayDur", swayDur);
+    h.style.setProperty("--twDur", twDur);
+    h.style.fontSize = size;
+    h.style.opacity = opacity;
+
     floatHearts.appendChild(h);
   }
 
@@ -746,6 +925,14 @@ but this one is yours.
   document.getElementById("guideBtn").addEventListener("click", () => {
     showGuide = !showGuide;
     [...board.querySelectorAll(".ghostSlot")].forEach(s => s.style.opacity = showGuide ? "1" : "0");
+  });
+
+  openLetterBtn.addEventListener("click", () => {
+    modal.classList.add("open");
+    if (!confettiOnce){
+      confettiOnce = true;
+      startConfetti();
+    }
   });
 
   function init(){
