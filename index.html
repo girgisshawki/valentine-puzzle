@@ -59,7 +59,7 @@
       transform:rotate(-8deg);
     }
 
-    /* floating hearts */
+    /* floating hearts background */
     .float-hearts{
       position:fixed;
       inset:0;
@@ -287,104 +287,192 @@
       font-weight:800;
     }
 
-    /* centered envelope */
-    .envelopeWrap{
-      position:absolute;
-      inset:0;
-      display:none;
-      place-items:center;
-      z-index:50;
-      background:linear-gradient(180deg, rgba(255,255,255,0.10), rgba(255,255,255,0.32));
-      backdrop-filter: blur(3px);
-    }
-    .envelopeWrap.show{ display:grid; }
-
-    .envelopeBtn{
-      width:min(92%, 520px);
-      border:none;
-      cursor:pointer;
-      background:rgba(255,255,255,0.90);
-      border:2px solid rgba(255,105,180,0.35);
-      border-radius:26px;
-      padding:22px 18px;
-      box-shadow:0 24px 60px rgba(255,105,180,0.34);
-      display:flex;
-      flex-direction:column;
-      align-items:center;
-      gap:14px;
-      transition:transform .18s ease, box-shadow .2s ease;
-    }
-    .envelopeBtn:hover{
-      transform:translateY(-4px) scale(1.01);
-      box-shadow:0 32px 80px rgba(255,105,180,0.40);
-    }
-
-    .envelopeIcon{
-      width:min(86%, 380px);
-      aspect-ratio:16/10;
-      border-radius:22px;
-      position:relative;
-      background:linear-gradient(135deg,#fff0f6,#ffe6f2);
-      border:2px solid rgba(255,105,180,0.35);
-      overflow:hidden;
-      box-shadow:0 18px 40px rgba(255,105,180,0.18);
-    }
-    .envelopeIcon::before{
-      content:"";
-      position:absolute;
-      inset:0;
-      background:
-        linear-gradient(135deg, transparent 48%, rgba(255,105,180,0.22) 49%, rgba(255,105,180,0.22) 51%, transparent 52%),
-        linear-gradient(225deg, transparent 48%, rgba(255,105,180,0.22) 49%, rgba(255,105,180,0.22) 51%, transparent 52%);
-      opacity:0.95;
-    }
-    .envelopeIcon::after{
-      content:"❤";
-      position:absolute;
-      left:50%; top:50%;
-      transform:translate(-50%,-45%);
-      color:rgba(179,0,94,0.88);
-      font-size:26px;
-      text-shadow:0 10px 20px rgba(255,105,180,0.25);
-    }
-
-    .envelopeText{ font-weight:1000; color:#b3005e; letter-spacing:0.2px; font-size:18px; }
-    .envelopeSub{ font-size:13px; color:rgba(90,0,64,0.66); font-weight:900; margin-top:-10px; }
-
-    /* Big letter modal */
-    .modal{
+    /* ✅ SOLVED OVERLAY (center of WHOLE PAGE) */
+    .solvedModal{
       position:fixed;
       inset:0;
       display:none;
       align-items:center;
       justify-content:center;
       padding:18px;
-      background:rgba(255,105,180,0.22);
-      backdrop-filter:blur(10px);
-      z-index:9999;
+      background:rgba(255,105,180,0.20);
+      backdrop-filter: blur(12px);
+      z-index:9997;
     }
-    .modal.open{ display:flex; }
+    .solvedModal.open{ display:flex; }
 
-    .modalCard{
-      width:min(740px,94vw);
-      min-height:min(70vh, 620px);
+    .solvedCard{
+      width:min(860px, 94vw);
+      min-height:min(72vh, 680px);
       background:linear-gradient(135deg,#fff0f6,#ffe6f2);
-      border-radius:28px;
+      border-radius:30px;
+      border:1px solid rgba(255,105,180,0.32);
+      box-shadow:0 34px 90px rgba(255,105,180,0.48);
+      position:relative;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      overflow:hidden;
       padding:18px;
-      border:1px solid rgba(255,105,180,0.30);
-      box-shadow:0 28px 70px rgba(255,105,180,0.42);
+      animation: popIn .28s ease-out both;
+    }
+    @keyframes popIn{
+      from{ transform: translateY(10px) scale(0.96); opacity:0; }
+      to{ transform: translateY(0) scale(1); opacity:1; }
+    }
+
+    /* Envelope animation */
+    .env{
+      width:min(520px, 92%);
+      aspect-ratio: 16/10;
+      position:relative;
+      border-radius:28px;
+      background:rgba(255,255,255,0.9);
+      border:2px solid rgba(255,105,180,0.35);
+      box-shadow:0 30px 70px rgba(255,105,180,0.30);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      cursor:pointer;
+      user-select:none;
+      animation: breathe 1.7s ease-in-out infinite;
+    }
+    @keyframes breathe{
+      0%,100%{ transform:translateY(0) scale(1); }
+      50%{ transform:translateY(-6px) scale(1.01); }
+    }
+
+    .env .shine{
+      position:absolute;
+      inset:-40%;
+      background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.60), transparent 55%);
+      transform:rotate(18deg);
+      opacity:0.7;
+      pointer-events:none;
+    }
+
+    .env .flap{
+      position:absolute;
+      left:50%;
+      top:18%;
+      width:74%;
+      height:54%;
+      transform:translateX(-50%);
+      background:linear-gradient(135deg,#fff0f6,#ffe6f2);
+      border:2px solid rgba(255,105,180,0.35);
+      border-bottom:none;
+      clip-path: polygon(0 0, 100% 0, 50% 100%);
+      transform-origin: 50% 0%;
+      border-radius:18px 18px 0 0;
+      box-shadow:0 18px 40px rgba(255,105,180,0.14);
+    }
+
+    .env .body{
+      position:absolute;
+      inset:18% 10% 14% 10%;
+      border-radius:22px;
+      background:linear-gradient(135deg,#fff9fc,#ffe6f2);
+      border:2px solid rgba(255,105,180,0.25);
+      overflow:hidden;
+    }
+    .env .seal{
+      position:absolute;
+      left:50%; top:50%;
+      transform:translate(-50%,-35%);
+      width:54px; height:54px;
+      border-radius:999px;
+      background:linear-gradient(135deg,#ff4d8d,#ff7eb3);
+      box-shadow:0 16px 35px rgba(255,105,180,0.35);
+      display:grid;
+      place-items:center;
+      color:white;
+      font-size:22px;
+    }
+
+    .env .tap{
+      position:absolute;
+      bottom:16px;
+      left:50%;
+      transform:translateX(-50%);
+      font-weight:1000;
+      color:#b3005e;
+      opacity:0.85;
       display:flex;
       flex-direction:column;
+      align-items:center;
+      gap:2px;
+      font-size:14px;
+    }
+    .env .tap small{
+      font-weight:900;
+      color:rgba(90,0,64,0.62);
+      font-size:12px;
+      margin-top:-2px;
     }
 
-    .modalTop{
+    /* little hearts around envelope */
+    .sparkHearts{
+      position:absolute;
+      inset:0;
+      pointer-events:none;
+      overflow:hidden;
+    }
+    .sparkHearts span{
+      position:absolute;
+      left:50%; top:50%;
+      transform:translate(-50%,-50%);
+      color:rgba(179,0,94,0.85);
+      text-shadow:0 12px 28px rgba(255,105,180,0.25);
+      opacity:0;
+      animation: burst 1.6s ease-out infinite;
+      font-size:18px;
+    }
+    .sparkHearts span:nth-child(1){ animation-delay:0s;   margin-left:-140px; margin-top:-60px; }
+    .sparkHearts span:nth-child(2){ animation-delay:.25s;  margin-left:150px;  margin-top:-70px; }
+    .sparkHearts span:nth-child(3){ animation-delay:.45s;  margin-left:-120px; margin-top:90px; }
+    .sparkHearts span:nth-child(4){ animation-delay:.65s;  margin-left:140px;  margin-top:85px; }
+    .sparkHearts span:nth-child(5){ animation-delay:.9s;   margin-left:0px;    margin-top:-130px; }
+    @keyframes burst{
+      0%{ opacity:0; transform:translate(-50%,-50%) scale(0.6); }
+      20%{ opacity:0.95; }
+      100%{ opacity:0; transform:translate(-50%,-80%) scale(1.35); }
+    }
+
+    /* Open letter animation */
+    .letter{
+      width:min(860px, 94vw);
+      min-height:min(78vh, 760px);
+      background:linear-gradient(135deg,#fff0f6,#ffe6f2);
+      border-radius:32px;
+      border:1px solid rgba(255,105,180,0.32);
+      box-shadow:0 34px 90px rgba(255,105,180,0.50);
+      position:relative;
+      padding:18px;
+      display:none;
+      flex-direction:column;
+      animation: letterIn .34s ease-out both;
+    }
+    @keyframes letterIn{
+      from{ transform: translateY(16px) scale(0.95); opacity:0; }
+      to{ transform: translateY(0) scale(1); opacity:1; }
+    }
+
+    .letterTop{
       display:flex;
       align-items:center;
       justify-content:space-between;
       gap:10px;
       margin-bottom:10px;
     }
-    .modalTop h2{ margin:0; font-size:18px; color:#b3005e; letter-spacing:0.2px; }
+    .letterTop h2{
+      margin:0;
+      font-size:18px;
+      color:#b3005e;
+      letter-spacing:0.2px;
+      display:flex;
+      align-items:center;
+      gap:8px;
+    }
 
     .close{
       background:linear-gradient(135deg,var(--pink1),var(--pink2));
@@ -403,46 +491,14 @@
       line-height:1.85;
       font-weight:800;
       font-size:18px;
-      padding:10px 4px 0;
+      padding:10px 6px 0;
     }
-
-    /* Loading overlay */
-    .loading{
-      position:absolute;
-      inset:0;
-      display:grid;
-      place-items:center;
-      background:rgba(255,255,255,0.6);
-      backdrop-filter: blur(8px);
-      z-index:60;
-    }
-    .loadingBox{
-      background:rgba(255,255,255,0.9);
-      border:1px solid rgba(255,105,180,0.25);
-      box-shadow:0 20px 50px rgba(255,105,180,0.25);
-      border-radius:22px;
-      padding:16px 18px;
-      font-weight:900;
-      color:#b3005e;
-      display:flex;
-      align-items:center;
-      gap:10px;
-    }
-    .spinner{
-      width:18px;height:18px;border-radius:99px;
-      border:3px solid rgba(255,77,141,0.25);
-      border-top-color: rgba(255,77,141,0.95);
-      animation:spin 0.9s linear infinite;
-    }
-    @keyframes spin{ to{ transform:rotate(360deg);} }
 
     @media (max-width:520px){
-      .modalCard{ min-height:72vh; }
-      .msg{ font-size:17px; }
-      .envelopeBtn{ width:92%; padding:18px 16px; }
-      .envelopeText{ font-size:17px; }
       .music{ width:100%; justify-content:space-between; margin-left:0; }
       .vol{ width:120px; }
+      .letter{ min-height:80vh; }
+      .msg{ font-size:17px; }
     }
   </style>
 </head>
@@ -451,7 +507,7 @@
   <div class="float-hearts" aria-hidden="true" id="floatHearts"></div>
   <canvas id="confetti"></canvas>
 
-  <!-- ✅ Audio (big files won't block page) -->
+  <!-- Audio -->
   <audio id="bgMusic" preload="none" loop>
     <source src="love.mp3" type="audio/mpeg">
   </audio>
@@ -486,20 +542,7 @@
           <span class="progress" id="progress">0/16</span>
         </div>
 
-        <div id="board">
-          <div class="loading" id="loading">
-            <div class="loadingBox"><span class="spinner"></span> Loading… ❤</div>
-          </div>
-
-          <div class="envelopeWrap" id="envelopeWrap">
-            <button class="envelopeBtn" id="openLetterBtn" type="button">
-              <div class="envelopeIcon"></div>
-              <div class="envelopeText">Tap to open ❤</div>
-              <div class="envelopeSub">A little letter…</div>
-            </button>
-          </div>
-        </div>
-
+        <div id="board"></div>
         <div class="hint" id="hint"></div>
       </div>
 
@@ -510,23 +553,38 @@
     </div>
   </div>
 
-  <div class="modal" id="modal">
-    <div class="modalCard">
-      <div class="modalTop">
-        <h2>❤</h2>
-        <button class="close" id="closeModal">Close</button>
+  <!-- ✅ SOLVED MODAL (center of page) -->
+  <div class="solvedModal" id="solvedModal">
+    <div class="solvedCard" id="solvedCard">
+      <!-- Envelope view -->
+      <div class="env" id="env">
+        <div class="shine"></div>
+        <div class="sparkHearts" aria-hidden="true">
+          <span>❤</span><span>❤</span><span>❤</span><span>❤</span><span>❤</span>
+        </div>
+        <div class="flap" id="flap"></div>
+        <div class="body"></div>
+        <div class="seal">❤</div>
+        <div class="tap">
+          Tap to open ❤
+          <small>A little letter…</small>
+        </div>
       </div>
-      <div class="msg" id="modalMsg"></div>
+
+      <!-- Letter view -->
+      <div class="letter" id="letter">
+        <div class="letterTop">
+          <h2>❤ A letter for you</h2>
+          <button class="close" id="closeLetter">Close</button>
+        </div>
+        <div class="msg" id="letterMsg"></div>
+      </div>
     </div>
   </div>
 
 <script>
-  // ✅ MUST match your file names (same folder as index.html)
   const IMAGE_SRC = "puzzle.jpg";
-  const MUSIC_SRC = "love.mp3";
-
-  const ROWS = 4;
-  const COLS = 4;
+  const ROWS = 4, COLS = 4;
 
   const finalMessage =
 `Some sunsets are beautiful...
@@ -539,67 +597,49 @@ Happy Valentine's Day my lovely Emy ♥️ ♥️`;
   const hint = document.getElementById("hint");
   const progress = document.getElementById("progress");
 
-  const envelopeWrap = document.getElementById("envelopeWrap");
-  const openLetterBtn = document.getElementById("openLetterBtn");
+  // solved modal elements
+  const solvedModal = document.getElementById("solvedModal");
+  const env = document.getElementById("env");
+  const flap = document.getElementById("flap");
+  const letter = document.getElementById("letter");
+  const closeLetter = document.getElementById("closeLetter");
+  const letterMsg = document.getElementById("letterMsg");
+  letterMsg.textContent = finalMessage;
 
-  const modal = document.getElementById("modal");
-  const modalMsg = document.getElementById("modalMsg");
-  const closeModal = document.getElementById("closeModal");
-  modalMsg.textContent = finalMessage;
+  closeLetter.addEventListener("click", () => {
+    letter.style.display = "none";
+    env.style.display = "flex";
+    flap.style.transform = "translateX(-50%) rotateX(0deg)";
+    solvedModal.classList.remove("open");
+  });
 
-  const loading = document.getElementById("loading");
-
-  closeModal.addEventListener("click", () => modal.classList.remove("open"));
-  modal.addEventListener("click", (e) => { if (e.target === modal) modal.classList.remove("open"); });
-
-  // prevent scroll/refresh only while dragging
+  // prevent scroll only while dragging
   let isDragging = false;
-  document.addEventListener("touchmove", (e) => {
-    if (isDragging) e.preventDefault();
-  }, { passive: false });
+  document.addEventListener("touchmove", (e) => { if (isDragging) e.preventDefault(); }, { passive:false });
 
-  // ---------- MUSIC ----------
+  // music
   const bgMusic = document.getElementById("bgMusic");
   const musicBtn = document.getElementById("musicBtn");
   const vol = document.getElementById("vol");
   const musicDot = document.getElementById("musicDot");
-
   bgMusic.volume = parseFloat(vol.value);
 
   function setMusicUI(playing){
     musicBtn.textContent = playing ? "Pause ❤" : "Play ❤";
     musicDot.classList.toggle("on", playing);
   }
-
   async function playMusic(){
-    try{
-      await bgMusic.play();
-      setMusicUI(true);
-    }catch(err){
-      setMusicUI(false);
-    }
+    try{ await bgMusic.play(); setMusicUI(true); }
+    catch(e){ setMusicUI(false); }
   }
-  function pauseMusic(){
-    bgMusic.pause();
-    setMusicUI(false);
-  }
+  function pauseMusic(){ bgMusic.pause(); setMusicUI(false); }
 
   musicBtn.addEventListener("click", async () => {
     if (bgMusic.paused) await playMusic();
     else pauseMusic();
   });
+  vol.addEventListener("input", ()=> bgMusic.volume = parseFloat(vol.value));
 
-  vol.addEventListener("input", () => {
-    bgMusic.volume = parseFloat(vol.value);
-  });
-
-  bgMusic.addEventListener("error", () => {
-    console.log("Music error:", MUSIC_SRC);
-    setMusicUI(false);
-    musicBtn.textContent = "No music ❤";
-  });
-
-  // auto-start after FIRST user interaction
   let armed = false;
   function armAutoplay(){
     if (armed) return;
@@ -612,14 +652,103 @@ Happy Valentine's Day my lovely Emy ♥️ ♥️`;
   window.addEventListener("pointerdown", armAutoplay, {capture:true, passive:true});
   window.addEventListener("touchstart", armAutoplay, {capture:true, passive:true});
   window.addEventListener("keydown", armAutoplay, {capture:true});
-  // --------------------------
 
-  // ---------- GAME ----------
-  const IMG = (src) => `url('${src}')`;
-  let imgUrl = IMAGE_SRC;
+  // confetti
+  const confettiCanvas = document.getElementById("confetti");
+  const ctx = confettiCanvas.getContext("2d");
+  let confetti = [];
+  let confettiRunning = false;
+
+  function resizeConfetti(){
+    confettiCanvas.width = window.innerWidth;
+    confettiCanvas.height = window.innerHeight;
+  }
+  window.addEventListener("resize", resizeConfetti);
+  resizeConfetti();
+
+  function startConfetti(){
+    if (confettiRunning) return;
+    confettiRunning = true;
+
+    confetti = Array.from({length: 220}, () => ({
+      x: Math.random()*confettiCanvas.width,
+      y: -20 - Math.random()*confettiCanvas.height*0.25,
+      s: 3 + Math.random()*5,
+      vy: 2 + Math.random()*4,
+      vx: -1 + Math.random()*2,
+      a: Math.random()*Math.PI*2,
+      va: -0.12 + Math.random()*0.24,
+      life: 200 + Math.random()*140
+    }));
+
+    requestAnimationFrame(tickConfetti);
+    setTimeout(() => { confettiRunning = false; }, 2600);
+  }
+
+  function tickConfetti(){
+    ctx.clearRect(0,0,confettiCanvas.width, confettiCanvas.height);
+
+    for (const p of confetti){
+      p.x += p.vx; p.y += p.vy; p.a += p.va; p.life -= 1;
+
+      ctx.save();
+      ctx.translate(p.x, p.y);
+      ctx.rotate(p.a);
+
+      const hue = 320 + Math.floor(Math.random()*45);
+      ctx.fillStyle = `hsla(${hue}, 92%, 70%, 0.92)`;
+      ctx.fillRect(-p.s, -p.s, p.s*2, p.s*2);
+
+      ctx.restore();
+    }
+
+    confetti = confetti.filter(p => p.life > 0 && p.y < confettiCanvas.height + 40);
+
+    if (confettiRunning || confetti.length){
+      requestAnimationFrame(tickConfetti);
+    } else {
+      ctx.clearRect(0,0,confettiCanvas.width, confettiCanvas.height);
+    }
+  }
+
+  // floating hearts background
+  const floatHearts = document.getElementById("floatHearts");
+  const COUNT = 34;
+  for(let i=0;i<COUNT;i++){
+    const h = document.createElement("div");
+    h.className = "heart";
+    h.textContent = "❤";
+    const left = Math.random()*100;
+    const dur = 7.5 + Math.random()*10.5;
+    const delay = Math.random()*6;
+    const scale = 0.55 + Math.random()*1.2;
+    const drift = (Math.random()*120 - 60).toFixed(0) + "px";
+    const rot = (Math.random()*260 - 130).toFixed(0) + "deg";
+    const sway = (Math.random()*26 - 13).toFixed(0) + "px";
+    const swayDur = (2.8 + Math.random()*3.2).toFixed(1) + "s";
+    const twDur = (2.0 + Math.random()*3.5).toFixed(1) + "s";
+    const size = (18 + Math.random()*34).toFixed(0) + "px";
+    const opacity = (0.10 + Math.random()*0.22).toFixed(2);
+
+    h.style.left = left + "vw";
+    h.style.setProperty("--dur", dur.toFixed(1) + "s");
+    h.style.setProperty("--delay", delay.toFixed(1) + "s");
+    h.style.setProperty("--scale", scale.toFixed(2));
+    h.style.setProperty("--drift", drift);
+    h.style.setProperty("--rot", rot);
+    h.style.setProperty("--sway", sway);
+    h.style.setProperty("--swayDur", swayDur);
+    h.style.setProperty("--twDur", twDur);
+    h.style.fontSize = size;
+    h.style.opacity = opacity;
+
+    floatHearts.appendChild(h);
+  }
+
+  // puzzle
+  const IMG = `url('${IMAGE_SRC}')`;
   let pieces = [];
   let showGuide = true;
-  let confettiOnce = false;
 
   function shuffle(arr){
     const a = [...arr];
@@ -635,9 +764,10 @@ Happy Valentine's Day my lovely Emy ♥️ ♥️`;
     [...board.querySelectorAll(".piece")].forEach(x => x.remove());
     tray.innerHTML = "";
     pieces = [];
-    envelopeWrap.classList.remove("show");
-    modal.classList.remove("open");
-    confettiOnce = false;
+    solvedModal.classList.remove("open");
+    letter.style.display = "none";
+    env.style.display = "flex";
+    flap.style.transform = "translateX(-50%) rotateX(0deg)";
   }
 
   function makeSlots(){
@@ -673,7 +803,6 @@ Happy Valentine's Day my lovely Emy ♥️ ♥️`;
   }
 
   function createPieces(){
-    const IMG_URL = IMG(imgUrl);
     for (let r=0; r<ROWS; r++){
       for (let c=0; c<COLS; c++){
         const correctIdx = r*COLS + c;
@@ -682,8 +811,7 @@ Happy Valentine's Day my lovely Emy ♥️ ♥️`;
         d.dataset.correct = String(correctIdx);
         d.dataset.placed = "0";
         d.dataset.locked = "0";
-
-        d.style.setProperty("--img", IMG_URL);
+        d.style.setProperty("--img", IMG);
         d.style.setProperty("--bgSize", `${COLS*100}% ${ROWS*100}%`);
 
         const posX = (c/(COLS-1||1))*100;
@@ -711,7 +839,6 @@ Happy Valentine's Day my lovely Emy ♥️ ♥️`;
     const placed = [...board.querySelectorAll(".piece")];
     if (placed.length !== ROWS*COLS){
       hint.textContent = `Placed ${placed.length}/${ROWS*COLS}`;
-      envelopeWrap.classList.remove("show");
       return;
     }
 
@@ -724,11 +851,14 @@ Happy Valentine's Day my lovely Emy ♥️ ♥️`;
 
     if (ok){
       hint.textContent = "Perfect ❤";
-      envelopeWrap.classList.add("show");
+      solvedModal.classList.add("open");
+      startConfetti();
     } else {
       hint.textContent = "Almost… ❤";
-      envelopeWrap.classList.remove("show");
-      modal.classList.remove("open");
+      solvedModal.classList.remove("open");
+      letter.style.display = "none";
+      env.style.display = "flex";
+      flap.style.transform = "translateX(-50%) rotateX(0deg)";
     }
   }
 
@@ -767,7 +897,7 @@ Happy Valentine's Day my lovely Emy ♥️ ♥️`;
         clone.style.width = origRect.width + "px";
         clone.style.height = origRect.height + "px";
         clone.style.margin = "0";
-        clone.style.zIndex = "9997";
+        clone.style.zIndex = "9996";
         clone.style.opacity = "0.95";
         clone.style.cursor = "grabbing";
         document.body.appendChild(clone);
@@ -817,7 +947,6 @@ Happy Valentine's Day my lovely Emy ♥️ ♥️`;
             p.style.visibility = "";
             tray.appendChild(p);
           }
-          modal.classList.remove("open");
           checkSolved();
         };
 
@@ -832,7 +961,6 @@ Happy Valentine's Day my lovely Emy ♥️ ♥️`;
           p.style.cursor = "grab";
           p.style.visibility = "";
           tray.appendChild(p);
-          modal.classList.remove("open");
           checkSolved();
         };
 
@@ -922,7 +1050,6 @@ Happy Valentine's Day my lovely Emy ♥️ ♥️`;
           lockIfCorrect(p);
 
           clone.remove();
-          modal.classList.remove("open");
           checkSolved();
           endDrag();
         };
@@ -933,138 +1060,38 @@ Happy Valentine's Day my lovely Emy ♥️ ♥️`;
     });
   }
 
-  // Confetti (kept simple)
-  const confettiCanvas = document.getElementById("confetti");
-  const ctx = confettiCanvas.getContext("2d");
-  let confetti = [];
-  let confettiRunning = false;
+  // Open envelope -> show letter with animation
+  env.addEventListener("click", () => {
+    // flap animation
+    flap.style.transition = "transform .45s ease";
+    flap.style.transform = "translateX(-50%) rotateX(180deg)";
 
-  function resizeConfetti(){
-    confettiCanvas.width = window.innerWidth;
-    confettiCanvas.height = window.innerHeight;
-  }
-  window.addEventListener("resize", resizeConfetti);
-  resizeConfetti();
-
-  function startConfetti(){
-    if (confettiRunning) return;
-    confettiRunning = true;
-
-    confetti = Array.from({length: 180}, () => ({
-      x: Math.random()*confettiCanvas.width,
-      y: -20 - Math.random()*confettiCanvas.height*0.3,
-      s: 3 + Math.random()*4,
-      vy: 2 + Math.random()*4,
-      vx: -1 + Math.random()*2,
-      a: Math.random()*Math.PI*2,
-      va: -0.12 + Math.random()*0.24,
-      life: 170 + Math.random()*130
-    }));
-
-    requestAnimationFrame(tickConfetti);
-    setTimeout(() => { confettiRunning = false; }, 2400);
-  }
-
-  function tickConfetti(){
-    ctx.clearRect(0,0,confettiCanvas.width, confettiCanvas.height);
-
-    for (const p of confetti){
-      p.x += p.vx; p.y += p.vy; p.a += p.va; p.life -= 1;
-
-      ctx.save();
-      ctx.translate(p.x, p.y);
-      ctx.rotate(p.a);
-
-      const hue = 320 + Math.floor(Math.random()*45);
-      ctx.fillStyle = `hsla(${hue}, 90%, 70%, 0.9)`;
-      ctx.fillRect(-p.s, -p.s, p.s*2, p.s*2);
-      ctx.restore();
-    }
-
-    confetti = confetti.filter(p => p.life > 0 && p.y < confettiCanvas.height + 40);
-
-    if (confettiRunning || confetti.length){
-      requestAnimationFrame(tickConfetti);
-    } else {
-      ctx.clearRect(0,0,confettiCanvas.width, confettiCanvas.height);
-    }
-  }
-
-  openLetterBtn.addEventListener("click", () => {
-    modal.classList.add("open");
-    if (!confettiOnce){
-      confettiOnce = true;
-      startConfetti();
-    }
-    if (bgMusic.paused) playMusic();
+    // show letter after a tiny delay
+    setTimeout(() => {
+      env.style.display = "none";
+      letter.style.display = "flex";
+      if (bgMusic.paused) playMusic();
+    }, 260);
   });
 
+  // buttons
   document.getElementById("shuffleBtn").addEventListener("click", shuffleTray);
-  document.getElementById("restartBtn").addEventListener("click", initGame);
+  document.getElementById("restartBtn").addEventListener("click", init);
   document.getElementById("guideBtn").addEventListener("click", () => {
     showGuide = !showGuide;
     [...board.querySelectorAll(".ghostSlot")].forEach(s => s.style.opacity = showGuide ? "1" : "0");
   });
 
-  // hearts background
-  const floatHearts = document.getElementById("floatHearts");
-  const COUNT = 34;
-  for(let i=0;i<COUNT;i++){
-    const h = document.createElement("div");
-    h.className = "heart";
-    h.textContent = "❤";
-    const left = Math.random()*100;
-    const dur = 7.5 + Math.random()*10.5;
-    const delay = Math.random()*6;
-    const scale = 0.55 + Math.random()*1.2;
-    const drift = (Math.random()*120 - 60).toFixed(0) + "px";
-    const rot = (Math.random()*260 - 130).toFixed(0) + "deg";
-    const sway = (Math.random()*26 - 13).toFixed(0) + "px";
-    const swayDur = (2.8 + Math.random()*3.2).toFixed(1) + "s";
-    const twDur = (2.0 + Math.random()*3.5).toFixed(1) + "s";
-    const size = (18 + Math.random()*34).toFixed(0) + "px";
-    const opacity = (0.10 + Math.random()*0.22).toFixed(2);
-
-    h.style.left = left + "vw";
-    h.style.setProperty("--dur", dur.toFixed(1) + "s");
-    h.style.setProperty("--delay", delay.toFixed(1) + "s");
-    h.style.setProperty("--scale", scale.toFixed(2));
-    h.style.setProperty("--drift", drift);
-    h.style.setProperty("--rot", rot);
-    h.style.setProperty("--sway", sway);
-    h.style.setProperty("--swayDur", swayDur);
-    h.style.setProperty("--twDur", twDur);
-    h.style.fontSize = size;
-    h.style.opacity = opacity;
-
-    floatHearts.appendChild(h);
-  }
-
-  function initGame(){
-    loading.style.display = "grid";
+  function init(){
     clearAll();
     makeSlots();
     updateTrayPieceSize();
-
-    // always init pieces (even if image fails)
     createPieces();
-    checkSolved();
-
-    // hide loading shortly after layout
-    setTimeout(()=>{ loading.style.display = "none"; }, 250);
   }
 
-  // preload image with cache-bust
   const preload = new Image();
-  preload.onload = () => {
-    imgUrl = IMAGE_SRC + "?v=" + Date.now();
-    initGame();
-  };
-  preload.onerror = () => {
-    imgUrl = ""; // fallback (pieces will be blank)
-    initGame();
-    hint.textContent = "Image not loading ❤ (check puzzle.jpg name/path)";
-  };
+  preload.onload = () => init();
+  preload.onerror = () => { hint.textContent = "Image not loading ❤ (check puzzle.jpg name/path)"; init(); };
   preload.src = IMAGE_SRC + "?v=" + Date.now();
 </script>
 </body>
